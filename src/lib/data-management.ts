@@ -38,13 +38,14 @@ export const saveWordsToLocalStorage = (words: WordData[]): void => {
 export const downloadWordsAsJson = (words: WordData[], status: 'learned' | 'have to learn'): void => {
   const filteredWords = words
     .filter(word => word.status === status)
-    // Optionally clean up the objects before export to only include core data
-    .map(({ id, word, websterMeaning, hindiMeaning, sentence, level }) => ({
+    // Include the new 'mnemonic' field in the export
+    .map(({ id, word, websterMeaning, hindiMeaning, sentence, mnemonic, level }) => ({
       id,
       word,
       websterMeaning,
       hindiMeaning,
       sentence,
+      mnemonic, // Include mnemonic
       level
     }));
 
