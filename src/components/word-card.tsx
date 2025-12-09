@@ -1,18 +1,19 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import {type  WordData , STATUS_OPTIONS, type StatusOption } from '@/types/data';
-import { SparklesIcon, Loader2Icon, BrainCircuitIcon } from 'lucide-react';
+import { SparklesIcon, Loader2Icon, BrainCircuitIcon, BotIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Assuming you have shadcn components in these paths:
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
 
 interface WordCardProps {
     wordData: WordData;
     handleStatusChange: (wordId: number, newStatus: WordData['status']) => void;
+    // Note: handleGenerateContent now specifically for Mnemonic/Sentence
     handleGenerateContent: (wordId: number, word: string, meaning: string) => Promise<void>;
 }
 
@@ -20,10 +21,18 @@ const WordCard: React.FC<WordCardProps> = ({ wordData, handleStatusChange, handl
     const currentStatus: StatusOption | undefined = STATUS_OPTIONS.find(opt => opt.key === wordData.status);
     const [isGenerating, setIsGenerating] = React.useState(false);
 
+    // Check if the card has enough data to generate further content
+    const isReadyForMnemonicGeneration = !!wordData.websterMeaning && !!wordData.word;
+
     const handleAIGeneration = async () => {
+        if (!isReadyForMnemonicGeneration) {
+             toast.warning("Missing Data", { description: "Please ensure the word and Webster's meaning are present before generating mnemonic/sentence." });
+             return;
+        }
         setIsGenerating(true);
         try {
-            await handleGenerateContent(wordData.id, wordData.word, wordData.websterMeaning);
+            // Note: We use the non-null assertion '!' here because we checked in isReadyForMnemonicGeneration
+            await handleGenerateContent(wordData.id, wordData.word, wordData.websterMeaning!);
             toast.success("Mnemonic and Sentence generated!", { description: `Content for '${wordData.word}' is ready.` });
         } catch (error) {
             console.error("AI Generation failed:", error);
@@ -32,6 +41,10 @@ const WordCard: React.FC<WordCardProps> = ({ wordData, handleStatusChange, handl
             setIsGenerating(false);
         }
     };
+
+    const needsFullGeneration = !wordData.websterMeaning || !wordData.hindiMeaning || !wordData.sentence;
+
+    const needsMnemonicGeneration = isReadyForMnemonicGeneration && !wordData.mnemonic;
 
     return (
       <Card className="mb-6 transition-all hover:shadow-xl bg-white dark:bg-card">
@@ -48,19 +61,19 @@ const WordCard: React.FC<WordCardProps> = ({ wordData, handleStatusChange, handl
             {/* Webster's Definition */}
             <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                 <p className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">Webster's Definition</p>
-                <p>{wordData.websterMeaning}</p>
+                <p>{wordData.websterMeaning || <span className="text-red-400 italic">Meaning missing.</span>}</p>
             </div>
 
             {/* Hindi Meaning */}
             <div className="border-l-4 border-blue-500 pl-3">
                 <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">Hindi Meaning</p>
-                <p>{wordData.hindiMeaning}</p>
+                <p>{wordData.hindiMeaning || <span className="text-red-400 italic">Meaning missing.</span>}</p>
             </div>
 
             {/* Live Sentence / AI Generated Sentence */}
             <div className="border-t border-gray-100 dark:border-gray-700 pt-3">
-                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-1">Live Sentence</p>
-                <p className="italic text-gray-600 dark:text-gray-400">"{wordData.sentence}"</p>
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-1">Example Sentence</p>
+                <p className="italic text-gray-600 dark:text-gray-400">"{wordData.sentence || <span className="text-red-400 not-italic">Sentence missing.</span>}"</p>
             </div>
 
             {/* Mnemonic Display */}
@@ -76,25 +89,42 @@ const WordCard: React.FC<WordCardProps> = ({ wordData, handleStatusChange, handl
                 </>
             )}
 
-            {/* AI Generate Button */}
-            {!wordData.mnemonic && (
+            {/* AI Generate Button (for Mnemonic/Sentence) */}
+            {needsMnemonicGeneration && (
                 <div className="flex justify-center pt-3">
                     <Button
                         onClick={handleAIGeneration}
-                        variant="default"
+                        variant="secondary"
                         size="sm"
-                        disabled={isGenerating}
-                        className="bg-purple-500 hover:bg-purple-600 text-white transition-all duration-200 shadow-md"
+                        disabled={isGenerating || !isReadyForMnemonicGeneration}
+                        className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/50 transition-all duration-200 shadow-md"
                     >
                         {isGenerating ? (
                             <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
                         ) : (
                             <SparklesIcon className="mr-2 h-4 w-4" />
                         )}
-                        {isGenerating ? 'Generating...' : 'Generate Mnemonic & Sentence'}
+                        {isGenerating ? 'Generating Mnemonic...' : 'Generate Mnemonic & Sentence'}
                     </Button>
                 </div>
             )}
+
+            {/* Call to Action for missing core data */}
+             {needsFullGeneration && (
+                <div className="flex justify-center pt-3">
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled
+                        className="opacity-80"
+                        title="Add the missing definition and sentence to use the AI features."
+                    >
+                        <BotIcon className="mr-2 h-4 w-4" /> AI Requires Missing Definitions
+                    </Button>
+                </div>
+            )}
+
+
         </CardContent>
 
         <CardFooter className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t pt-4 border-gray-100 dark:border-gray-700">

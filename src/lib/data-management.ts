@@ -21,6 +21,18 @@ export const getInitialWords = (): WordData[] => {
 };
 
 /**
+ * Generates a unique ID for a new word based on the current words array.
+ * @param {WordData[]} words - The current array of words.
+ * @returns {number} A new unique ID.
+ */
+export const getNewWordId = (words: WordData[]): number => {
+  if (words.length === 0) return 1;
+  // Find the maximum existing ID and add 1
+  const maxId = Math.max(...words.map(w => w.id));
+  return maxId + 1;
+};
+
+/**
  * Saves the vocabulary data to localStorage.
  * @param {WordData[]} words - The array of words to save.
  */

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getInitialWords, saveWordsToLocalStorage } from '@/lib/data-management';
+import { getInitialWords, saveWordsToLocalStorage, getNewWordId } from '@/lib/data-management';
 
 // Page Components and UI
 import Navbar from '@/components/navbar';
@@ -7,6 +7,7 @@ import HomePage from '@/pages/home-page';
 import TrackerPage from '@/pages/tracker-page';
 import { Toaster } from '@/components/ui/sonner';
 import type { WordData } from './types/data';
+import { toast } from 'sonner';
 
 // --- API CONFIGURATION ---
 const GEMINI_API_KEY = (import.meta.env.GEMINI_API_KEY || "").toString();
@@ -36,7 +37,7 @@ async function fetchWithRetry(url: string, options: RequestInit, retries = 0): P
   }
 }
 
-// --- NEW UTILITY: Robust JSON Extraction ---
+// --- UTILITY: Robust JSON Extraction ---
 /**
  * Safely extracts a JSON string from a raw text response, handling markdown fences.
  * @param rawText The raw text response from the API.
@@ -61,6 +62,68 @@ function extractJson(rawText: string): string | null {
   return rawText.trim();
 }
 
+// --- AI Service Functions ---
+
+/**
+ * Generates a new, high-level vocabulary word with its meaning, Hindi meaning,
+ * and an example sentence.
+ */
+const generateNewWordAndDefinition = async () => {
+    const systemPrompt = `You are a professional vocabulary builder. Generate a single, challenging, high-level English word (C1/C2 level) and provide its Webster meaning, Hindi meaning (as a transcription if possible, e.g., तत्परता (Tatparta)), and one practical English example sentence.
+
+    Format your output STRICTLY as a JSON object with four keys:
+    1. word (string)
+    2. websterMeaning (string)
+    3. hindiMeaning (string)
+    4. sentence (string)`;
+
+    const userQuery = `Suggest one new English word with all its details. The word should be high-level and not in this list: Ubiquitous, Ephemeral, Mellifluous, Serendipity, Pernicious, Alacrity.`;
+
+    const payload = {
+        contents: [{ parts: [{ text: userQuery }] }],
+        systemInstruction: {
+            parts: [{ text: systemPrompt }]
+        },
+        // Using Google Search to ensure definitions are accurate
+        tools: [{ "google_search": {} }],
+        generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: "OBJECT",
+                properties: {
+                    "word": { "type": "STRING" },
+                    "websterMeaning": { "type": "STRING" },
+                    "hindiMeaning": { "type": "STRING" },
+                    "sentence": { "type": "STRING" }
+                },
+                "propertyOrdering": ["word", "websterMeaning", "hindiMeaning", "sentence"]
+            }
+        }
+    };
+
+    const response = await fetchWithRetry(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+    const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!rawText) {
+        throw new Error("AI word generation response was empty or malformed.");
+    }
+
+    const jsonString = extractJson(rawText);
+
+    if (!jsonString) {
+        console.error("Failed to extract JSON for new word:", rawText);
+        throw new Error("Could not extract valid JSON for the new word.");
+    }
+
+    return JSON.parse(jsonString);
+};
+
 // --- MAIN APP COMPONENT ---
 const App: React.FC = () => {
   const [words, setWords] = useState<WordData[]>(getInitialWords);
@@ -73,6 +136,53 @@ const App: React.FC = () => {
   useEffect(() => {
     saveWordsToLocalStorage(words);
   }, [words]);
+
+
+  // Handler to add a new word (manual or AI-generated)
+  const handleAddNewWord = useCallback((newWordData: Partial<WordData>) => {
+    setWords(prevWords => {
+        const newWord: WordData = {
+            id: getNewWordId(prevWords),
+            word: newWordData.word || 'Untitled Word', // Ensure word exists
+            level: newWordData.level || 'B2', // Default level
+            status: newWordData.status || 'have to learn',
+            websterMeaning: newWordData.websterMeaning,
+            hindiMeaning: newWordData.hindiMeaning,
+            sentence: newWordData.sentence,
+            mnemonic: newWordData.mnemonic,
+        };
+        // Check for duplicates before adding
+        if (prevWords.some(w => w.word.toLowerCase() === newWord.word.toLowerCase())) {
+            toast.error("Duplicate Word", { description: `'${newWord.word}' already exists in your list!` });
+            return prevWords; // Do not update state if duplicate
+        }
+        toast.success("Word Added", { description: `'${newWord.word}' has been added to your list!` });
+        return [newWord, ...prevWords];
+    });
+  }, []);
+
+
+  // Handler to generate a new word using AI and add it to the list
+  const handleGenerateWord = useCallback(async () => {
+    try {
+        const newWordContent = await generateNewWordAndDefinition();
+
+        // Add the AI-generated word using the common handler
+        handleAddNewWord({
+            word: newWordContent.word,
+            websterMeaning: newWordContent.websterMeaning,
+            hindiMeaning: newWordContent.hindiMeaning,
+            sentence: newWordContent.sentence,
+            level: 'C1', // Assume AI suggests a high-level word
+            status: 'have to learn',
+        });
+    } catch (e) {
+        console.error("Error generating new word:", e);
+        toast.error("AI Generation Failed", { description: "Could not generate a new word and definition." });
+        throw e;
+    }
+  }, [handleAddNewWord]);
+
 
   // 2. Status Update Function (Passed down to TrackerPage -> WordCard)
   const handleStatusChange = useCallback((wordId: number, newStatus: WordData['status']) => {
@@ -138,7 +248,8 @@ const App: React.FC = () => {
             w.id === wordId ? {
                 ...w,
                 mnemonic: generatedContent.mnemonic,
-                sentence: generatedContent.sentence
+                // Only update sentence if the existing one is the starter sentence
+                sentence: w.sentence === w.websterMeaning ? generatedContent.sentence : generatedContent.sentence
             } : w
         ));
     } catch (e) {
@@ -158,7 +269,13 @@ const App: React.FC = () => {
       case 'home':
         return <HomePage onStartTracking={handleStartTracking} />;
       case 'tracker':
-        return <TrackerPage words={words} handleStatusChange={handleStatusChange} handleGenerateContent={handleGenerateContent} />;
+        return <TrackerPage
+          words={words}
+          handleStatusChange={handleStatusChange}
+          handleGenerateContent={handleGenerateContent}
+          handleAddNewWord={handleAddNewWord}
+          handleGenerateWord={handleGenerateWord}
+        />;
       default:
         return <HomePage onStartTracking={handleStartTracking} />;
     }
