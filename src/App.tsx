@@ -36,6 +36,31 @@ async function fetchWithRetry(url: string, options: RequestInit, retries = 0): P
   }
 }
 
+// --- NEW UTILITY: Robust JSON Extraction ---
+/**
+ * Safely extracts a JSON string from a raw text response, handling markdown fences.
+ * @param rawText The raw text response from the API.
+ * @returns A clean JSON string or null if unable to parse.
+ */
+function extractJson(rawText: string): string | null {
+  // 1. Try to find content inside optional '```json' ... '```' markdown block
+  const match = rawText.match(/```json\s*([\s\S]*?)\s*```/);
+  if (match && match[1]) {
+    return match[1].trim();
+  }
+
+  // 2. Fallback: Try to clean up stray characters around the curly braces
+  const cleanedText = rawText.replace(/^[\s\S]*?{/, '{').replace(/}[\s\S]*?$/, '}');
+
+  // Basic validation that it looks like a JSON object
+  if (cleanedText.startsWith('{') && cleanedText.endsWith('}')) {
+      return cleanedText;
+  }
+
+  // 3. Last resort: Return the raw trimmed text.
+  return rawText.trim();
+}
+
 // --- MAIN APP COMPONENT ---
 const App: React.FC = () => {
   const [words, setWords] = useState<WordData[]>(getInitialWords);
@@ -92,13 +117,21 @@ const App: React.FC = () => {
         });
 
         const result = await response.json();
-        const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
-        if (!jsonText) {
+        if (!rawText) {
             throw new Error("AI response was empty or malformed.");
         }
 
-        const generatedContent = JSON.parse(jsonText);
+        const jsonString = extractJson(rawText);
+
+        if (!jsonString) {
+            // Log the problematic raw text to help debug future errors
+            console.error("Failed to extract JSON from raw response:", rawText);
+            throw new Error("Could not extract valid JSON from AI response.");
+        }
+
+        const generatedContent: { mnemonic: string, sentence: string } = JSON.parse(jsonString);
 
         // Update the word in state with the new content
         setWords(prevWords => prevWords.map(w =>

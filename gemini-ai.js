@@ -1,70 +1,117 @@
-
 /**
- * Simple script to test the Gemini API key and connection.
+ * Interactive script to get the Webster meaning of a word using the Gemini API
+ * with Google Search grounding.
  *
- * IMPORTANT: Replace "YOUR_GEMINI_API_KEY" below with the actual key
- * you obtained from Google AI Studio.
+ * NOTE: This script assumes the GEMINI_API_KEY is correctly set in the environment.
  */
-// 1. Replace this placeholder with your actual Gemini API Key
-
-
+// 1. API Key is expected to be loaded from the environment (e.g., via process.env)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
 // 2. Define the API endpoint URL and model
 const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
-
-// 3. Define the request payload
-const payload = {
-    contents: [{
-        parts: [{
-            text: "Write a short, encouraging welcome message for a new vocabulary learner."
-        }]
-    }]
-};
+const MAX_RETRIES = 5;
 
 /**
- * Executes the API call and handles the response.
+ * Executes a robust API call to get the Webster meaning for a given word.
+ * @param {string} word The word to look up.
  */
-async function testGeminiAPI() {
-    if (GEMINI_API_KEY === "YOUR_GEMINI_API_KEY" || !GEMINI_API_KEY) {
-        console.error("ERROR: Please replace 'YOUR_GEMINI_API_KEY' with your actual key in the script.");
+async function getWebsterMeaning(word) {
+    const systemPrompt = `You are an expert lexicographer. Provide a concise, clear definition of the word, suitable for a vocabulary learner. Your definition should resemble a formal dictionary entry (e.g., from Webster's dictionary). Only include the definition, not introductory or conversational text.`;
+    const userQuery = `What is the Webster dictionary meaning of the word: "${word}"?`;
+
+    const payload = {
+        contents: [{ parts: [{ text: userQuery }] }],
+        systemInstruction: {
+            parts: [{ text: systemPrompt }]
+        },
+        // IMPORTANT: Use Google Search tool for grounded, up-to-date meaning
+        tools: [{ "google_search": {} }]
+    };
+
+    const options = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    };
+
+    for (let retries = 0; retries < MAX_RETRIES; retries++) {
+        try {
+            const response = await fetch(API_URL, options);
+            const result = await response.json();
+
+            if (response.status === 429 && retries < MAX_RETRIES - 1) {
+                const delay = Math.pow(2, retries) * 1000;
+                console.log(`Rate limit hit. Retrying in ${delay / 1000} seconds...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                continue; // Retry the loop
+            }
+
+            if (!response.ok) {
+                console.error(`API Error - Status: ${response.status} ${response.statusText}`);
+                console.error("Error Details:", result);
+                return "Error: Could not retrieve meaning.";
+            }
+
+            const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            // Extract and display the search sources for grounding
+            let sources = [];
+            const groundingMetadata = result.candidates?.[0]?.groundingMetadata;
+            if (groundingMetadata?.groundingAttributions) {
+                sources = groundingMetadata.groundingAttributions
+                    .map(attr => attr.web?.uri || 'N/A')
+                    .filter(uri => uri !== 'N/A');
+            }
+
+            let output = generatedText || "No definition found.";
+
+            if (sources.length > 0) {
+                 output += `\n\n--- Sources ---\n${sources.join('\n')}`;
+            }
+
+            return output;
+
+        } catch (error) {
+            if (retries < MAX_RETRIES - 1) {
+                const delay = Math.pow(2, retries) * 1000;
+                console.log(`Network error. Retrying in ${delay / 1000} seconds...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                continue;
+            }
+            console.error("An unexpected error occurred:", error);
+            return "Fatal Error: Failed to connect or complete the request.";
+        }
+    }
+    return "Error: Maximum retries reached.";
+}
+
+/**
+ * Main interactive function.
+ */
+async function main() {
+    if (!GEMINI_API_KEY) {
+        console.error("ERROR: GEMINI_API_KEY is not set in the environment.");
         return;
     }
 
-    console.log(`Testing connection to Gemini API using model: ${MODEL_NAME}...`);
+    let word = prompt("Enter a word to get its Webster meaning:");
 
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+    // Simple loop for multiple lookups
+    while (word && word.trim() !== '') {
+        const result = await getWebsterMeaning(word.trim());
 
-        // Parse the response, even if the status is not strictly 'ok' (to check for API errors)
-        const result = await response.json();
+        console.log(`\n========================================`);
+        console.log(`WORD: ${word.toUpperCase()}`);
+        console.log(`========================================`);
+        console.log(`DEFINITION:\n${result}`);
+        console.log(`========================================\n`);
 
-        if (response.ok) {
-            const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-            console.log("--- API Test SUCCESSFUL ---");
-            console.log("Status: 200 OK");
-            console.log("Generated Text:");
-            console.log(generatedText || "No text returned, but response status was OK.");
-        } else {
-            console.log("--- API Test FAILED (HTTP Error) ---");
-            console.error(`Status: ${response.status} ${response.statusText}`);
-            console.error("Error Details:", result);
-            if (response.status === 400 || response.status === 403) {
-                 console.log("\nPossible API Key Issues:");
-                 console.log("1. Key is incorrect or revoked.");
-                 console.log("2. Project is not enabled for the Gemini API.");
-            }
-        }
-    } catch (error) {
-        console.log("--- API Test FAILED (Network/Fetch Error) ---");
-        console.error("An unexpected error occurred:", error);
+        word = prompt("Enter another word (or leave blank to exit):");
     }
+
+    console.log("Exiting Webster Meaning Generator.");
 }
 
-// Execute the test function
-testGeminiAPI();
+// Execute the main function
+main();
