@@ -5,7 +5,7 @@
  * NOTE: This script assumes the GEMINI_API_KEY is correctly set in the environment.
  */
 // 1. API Key is expected to be loaded from the environment (e.g., via process.env)
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_API_KEY = process.env.VITE_GEMINI_API_KEY;
 
 // 2. Define the API endpoint URL and model
 const MODEL_NAME = 'gemini-2.5-flash-preview-09-2025';

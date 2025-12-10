@@ -1,158 +1,100 @@
 import * as React from 'react';
+import {type  WordData,type  LearningStatus } from '@/types/data';
 import { cn } from '@/lib/utils';
-import {type  WordData , STATUS_OPTIONS, type StatusOption } from '@/types/data';
-import { SparklesIcon, Loader2Icon, BrainCircuitIcon, BotIcon } from 'lucide-react';
-import { toast } from 'sonner';
-
-// Assuming you have shadcn components in these paths:
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
+import { CheckIcon, HelpCircleIcon, XIcon, EyeIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Card, } from '@/components/ui/card';
 
 interface WordCardProps {
-    wordData: WordData;
-    handleStatusChange: (wordId: number, newStatus: WordData['status']) => void;
-    // Note: handleGenerateContent now specifically for Mnemonic/Sentence
-    handleGenerateContent: (wordId: number, word: string, meaning: string) => Promise<void>;
+  word: WordData;
+  onUpdateStatus: (id: number, status: LearningStatus) => void;
 }
 
-const WordCard: React.FC<WordCardProps> = ({ wordData, handleStatusChange, handleGenerateContent }) => {
-    const currentStatus: StatusOption | undefined = STATUS_OPTIONS.find(opt => opt.key === wordData.status);
-    const [isGenerating, setIsGenerating] = React.useState(false);
+export function WordCard({ word, onUpdateStatus }: WordCardProps) {
+  const [isRevealed, setIsRevealed] = React.useState(false);
 
-    // Check if the card has enough data to generate further content
-    const isReadyForMnemonicGeneration = !!wordData.websterMeaning && !!wordData.word;
+  // Reset state when the specific word instance changes
+  React.useEffect(() => {
+    setIsRevealed(false);
+  }, [word.id]);
 
-    const handleAIGeneration = async () => {
-        if (!isReadyForMnemonicGeneration) {
-             toast.warning("Missing Data", { description: "Please ensure the word and Webster's meaning are present before generating mnemonic/sentence." });
-             return;
-        }
-        setIsGenerating(true);
-        try {
-            // Note: We use the non-null assertion '!' here because we checked in isReadyForMnemonicGeneration
-            await handleGenerateContent(wordData.id, wordData.word, wordData.websterMeaning!);
-            toast.success("Mnemonic and Sentence generated!", { description: `Content for '${wordData.word}' is ready.` });
-        } catch (error) {
-            console.error("AI Generation failed:", error);
-            toast.error("Generation Failed", { description: "Could not connect to the AI model." });
-        } finally {
-            setIsGenerating(false);
-        }
-    };
+  return (
+    <Card className="w-full max-w-md mx-auto bg-card border-border shadow-2xl overflow-hidden flex flex-col min-h-[400px]">
 
-    const needsFullGeneration = !wordData.websterMeaning || !wordData.hindiMeaning || !wordData.sentence;
+      {/* 1. Card Face (Click to Reveal) */}
+      <div
+        onClick={() => setIsRevealed(!isRevealed)}
+        className="flex-1 flex flex-col items-center justify-center p-8 cursor-pointer relative group transition-colors hover:bg-accent/10"
+      >
+        <span className="absolute top-4 right-4 text-xs font-mono text-muted-foreground opacity-50 flex items-center gap-1">
+          <EyeIcon className="h-3 w-3" /> Tap to reveal
+        </span>
 
-    const needsMnemonicGeneration = isReadyForMnemonicGeneration && !wordData.mnemonic;
+        {/* Word Display */}
+        <h2 className="text-4xl font-black text-foreground mb-6 text-center tracking-tight drop-shadow-md">
+          {word.word}
+        </h2>
 
-    return (
-      <Card className="mb-6 transition-all hover:shadow-xl bg-white dark:bg-card">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white leading-tight">
-            {wordData.word}
-          </h2>
-          <Badge className="bg-blue-600 hover:bg-blue-600 dark:bg-blue-800 dark:hover:bg-blue-700 text-white font-semibold">
-            Level: {wordData.level}
-          </Badge>
-        </CardHeader>
-
-        <CardContent className="space-y-4 text-gray-700 dark:text-gray-300">
-            {/* Webster's Definition */}
-            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                <p className="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">Webster's Definition</p>
-                <p>{wordData.websterMeaning || <span className="text-red-400 italic">Meaning missing.</span>}</p>
-            </div>
-
-            {/* Hindi Meaning */}
-            <div className="border-l-4 border-blue-500 pl-3">
-                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">Hindi Meaning</p>
-                <p>{wordData.hindiMeaning || <span className="text-red-400 italic">Meaning missing.</span>}</p>
-            </div>
-
-            {/* Live Sentence / AI Generated Sentence */}
-            <div className="border-t border-gray-100 dark:border-gray-700 pt-3">
-                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-1">Example Sentence</p>
-                <p className="italic text-gray-600 dark:text-gray-400">"{wordData.sentence || <span className="text-red-400 not-italic">Sentence missing.</span>}"</p>
-            </div>
-
-            {/* Mnemonic Display */}
-            {wordData.mnemonic && (
-                <>
-                    <Separator className="bg-gray-100 dark:bg-gray-700" />
-                    <div className="bg-purple-50 dark:bg-purple-900/40 p-3 rounded-lg border border-purple-200 dark:border-purple-800">
-                        <p className="text-sm font-bold text-purple-800 dark:text-purple-300 mb-1 flex items-center">
-                            <BrainCircuitIcon className="h-4 w-4 mr-2" /> AI Mnemonic
-                        </p>
-                        <p className="text-purple-700 dark:text-purple-200">{wordData.mnemonic}</p>
-                    </div>
-                </>
-            )}
-
-            {/* AI Generate Button (for Mnemonic/Sentence) */}
-            {needsMnemonicGeneration && (
-                <div className="flex justify-center pt-3">
-                    <Button
-                        onClick={handleAIGeneration}
-                        variant="secondary"
-                        size="sm"
-                        disabled={isGenerating || !isReadyForMnemonicGeneration}
-                        className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/50 transition-all duration-200 shadow-md"
-                    >
-                        {isGenerating ? (
-                            <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                            <SparklesIcon className="mr-2 h-4 w-4" />
-                        )}
-                        {isGenerating ? 'Generating Mnemonic...' : 'Generate Mnemonic & Sentence'}
-                    </Button>
-                </div>
-            )}
-
-            {/* Call to Action for missing core data */}
-             {needsFullGeneration && (
-                <div className="flex justify-center pt-3">
-                    <Button
-                        variant="destructive"
-                        size="sm"
-                        disabled
-                        className="opacity-80"
-                        title="Add the missing definition and sentence to use the AI features."
-                    >
-                        <BotIcon className="mr-2 h-4 w-4" /> AI Requires Missing Definitions
-                    </Button>
-                </div>
-            )}
-
-
-        </CardContent>
-
-        <CardFooter className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t pt-4 border-gray-100 dark:border-gray-700">
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
-            Current Status: <span className={cn("font-bold", {
-                'text-green-600 dark:text-green-400': currentStatus?.key === 'learned',
-                'text-yellow-600 dark:text-yellow-400': currentStatus?.key === 'revised',
-                'text-red-600 dark:text-red-400': currentStatus?.key === 'have to learn',
-            })}>
-              {currentStatus?.label}
-            </span>
+        {/* Meaning Display (Animated) */}
+        <div className={cn(
+          "transition-all duration-500 ease-in-out text-center overflow-hidden flex flex-col items-center",
+          isRevealed ? "opacity-100 max-h-48 translate-y-0" : "opacity-0 max-h-0 translate-y-4"
+        )}>
+          <div className="w-12 h-1 bg-primary/30 rounded-full mb-4" />
+          <p className="text-lg text-foreground/90 leading-relaxed font-medium">
+            {word.meaning}
           </p>
-          <div className="flex flex-wrap gap-2">
-            {STATUS_OPTIONS.map((option) => (
-              <Button
-                key={option.key}
-                onClick={() => handleStatusChange(wordData.id, option.key)}
-                disabled={wordData.status === option.key}
-                variant={option.variant === "warning" ? "secondary" : option.variant}
-                size="sm"
-              >
-                Set to {option.label}
-              </Button>
-            ))}
-          </div>
-        </CardFooter>
-      </Card>
-    );
-};
+          {word.sentence && (
+            <div className="mt-4 p-3 bg-secondary/30 rounded-lg border-l-2 border-primary">
+              <p className="text-sm text-muted-foreground italic">
+                "{word.sentence}"
+              </p>
+            </div>
+          )}
+        </div>
 
-export default WordCard;
+        {/* Current Status Dot */}
+        <div className={cn(
+          "absolute top-4 left-4 w-3 h-3 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)]",
+          word.status === 'known' ? 'bg-green-500 shadow-green-500/50' :
+          word.status === 'review' ? 'bg-amber-500 shadow-amber-500/50' : 'bg-red-500 shadow-red-500/50'
+        )} />
+      </div>
+
+      {/* 2. Action Buttons */}
+      <div className="grid grid-cols-3 gap-2 p-4 bg-background/50 border-t border-border backdrop-blur-md">
+
+        {/* Unknown Button */}
+        <Button
+          variant="outline"
+          onClick={() => onUpdateStatus(word.id, 'unknown')}
+          className="h-auto py-3 flex-col gap-1 border-red-900/30 hover:bg-red-950/30 hover:text-red-400 text-red-500/80"
+        >
+          <XIcon className="h-5 w-5" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">Unknown</span>
+        </Button>
+
+        {/* Review Button */}
+        <Button
+          variant="outline"
+          onClick={() => onUpdateStatus(word.id, 'review')}
+          className="h-auto py-3 flex-col gap-1 border-amber-900/30 hover:bg-amber-950/30 hover:text-amber-400 text-amber-500/80"
+        >
+          <HelpCircleIcon className="h-5 w-5" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">Review</span>
+        </Button>
+
+        {/* Known Button */}
+        <Button
+          variant="outline"
+          onClick={() => onUpdateStatus(word.id, 'known')}
+          className="h-auto py-3 flex-col gap-1 border-green-900/30 hover:bg-green-950/30 hover:text-green-400 text-green-500/80"
+        >
+          <CheckIcon className="h-5 w-5" />
+          <span className="text-[10px] font-bold uppercase tracking-wider">Known</span>
+        </Button>
+
+      </div>
+    </Card>
+  );
+}
