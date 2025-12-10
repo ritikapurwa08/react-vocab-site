@@ -1,6 +1,7 @@
 export type LearningStatus = 'known' | 'review' | 'unknown';
 
 export interface WordData {
+  step: number;
   id: number;
   word: string;
   meaning: string;        // The English definition (Webster's)

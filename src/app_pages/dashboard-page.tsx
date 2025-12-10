@@ -1,8 +1,8 @@
-
-
 import { BottomNav } from "@/components/bottom-navigation";
+import { InstallPWA } from "@/components/intall-pwa";
 import { Icon } from "@/components/material-icon-helper";
 import { Link } from "react-router-dom";
+
 
 export default function Dashboard() {
   return (
@@ -15,7 +15,10 @@ export default function Dashboard() {
         <h1 className="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1">
           Welcome back, Alex!
         </h1>
-        <div className="flex w-12 items-center justify-end">
+        <div className="flex items-center justify-end gap-2">
+          {/* Install Button will appear here if supported */}
+          <InstallPWA />
+
           <button className="flex items-center justify-center rounded-lg h-12 bg-transparent text-gray-900 dark:text-white">
             <Icon name="account_circle" className="text-3xl" />
           </button>
