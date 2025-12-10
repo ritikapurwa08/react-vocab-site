@@ -110,3 +110,51 @@
     @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border border-white/20 shadow-xl;
   }
 }
+@theme {
+  --font-display: "Lexend", sans-serif;
+
+  /* Your Design System Colors */
+  --color-primary: #19e66f;
+  --color-primary-foreground: #112118;
+
+  --color-background-light: #f6f8f7;
+  --color-background-dark: #112118;
+
+  /* Additional colors extracted from your HTML */
+  --color-card-dark: #1c2620;
+  --color-border-dark: #3c5345;
+  --color-text-muted: #9db8a9;
+
+  /* Re-map shadcn variables to your theme if needed,
+     or just use your custom ones alongside them. */
+}
+
+/* Material Symbols Utility */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+.material-symbols-outlined.fill {
+  font-variation-settings: 'FILL' 1;
+}
+
+/* Scrollbar Hiding Utility */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
