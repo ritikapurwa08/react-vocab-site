@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Word Learning Page</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#36e27b",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#112117",
+                        "card-dark": "#1a2c22", 
+                        "secondary-dark": "#23362b",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                    boxShadow: {
+                        'radiant': '0 0 50px -12px rgba(54, 226, 123, 0.25)',
+                        'glow': '0 0 15px rgba(54, 226, 123, 0.4)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom utilities if needed */
+        .glass-panel {
+            background: rgba(26, 44, 34, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .text-shadow-glow {
+            text-shadow: 0 0 20px rgba(54, 226, 123, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display antialiased selection:bg-primary selection:text-black">
+<div class="relative flex min-h-screen w-full flex-col overflow-hidden">
+<!-- Ambient Background Glows -->
+<div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+<!-- Navigation Header -->
+<header class="flex items-center justify-between px-8 py-5 border-b border-white/5 relative z-10 glass-panel">
+<div class="flex items-center gap-3 text-white">
+<div class="size-8 text-primary">
+<span class="material-symbols-outlined text-[32px]">school</span>
+</div>
+<h2 class="text-white text-xl font-bold leading-tight tracking-tight">WordWise</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center gap-2 text-sm font-medium text-slate-400">
+<span class="material-symbols-outlined text-lg">keyboard</span>
+<span>Shortcuts: Space (Known) / X (Unknown)</span>
+</div>
+<div class="h-8 w-[1px] bg-white/10 hidden md:block"></div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="User profile picture placeholder with abstract gradient" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAvA-5VJ5dy_yIMeY5OH_bi9_gwYsxopMIWM8_kSkfVwXacxUBSUHNG45SS_c9cgL5izGux92ZzBihCeqAVCzBWCsWWDxVbn_tIRNMJuP9H-lJiqViyvo1kmMT9yoGDfbARSfNGZdcvONXVw04Cjopt1LRDiyaBU9ZpPv0bouzcPpdrwS1-TUiLg_FBoqgWa6mIcG9VnW1i9IASXkPW8dmR4y5ADrphSSwlJC6_6_T99Qa8mYX6mtD3sIp-Fcm-39idlgHtyfeIcrhl");'></div>
+</div>
+</header>
+<!-- Main Content Layout -->
+<main class="flex-1 flex flex-col items-center justify-center p-4 md:p-8 gap-8 relative z-10">
+<!-- Progress & Stats Dashboard -->
+<div class="w-full max-w-3xl grid grid-cols-2 md:grid-cols-4 gap-4">
+<!-- Stat 1: Streak -->
+<div class="flex flex-col items-center justify-center gap-1 rounded-2xl bg-secondary-dark/50 border border-white/5 p-3 backdrop-blur-sm">
+<div class="flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-xl">local_fire_department</span>
+<span class="text-xl font-bold">12</span>
+</div>
+<span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Day Streak</span>
+</div>
+<!-- Stat 2: Words Learned -->
+<div class="flex flex-col items-center justify-center gap-1 rounded-2xl bg-secondary-dark/50 border border-white/5 p-3 backdrop-blur-sm">
+<div class="flex items-center gap-2 text-blue-400">
+<span class="material-symbols-outlined text-xl">library_books</span>
+<span class="text-xl font-bold">450</span>
+</div>
+<span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Words Learned</span>
+</div>
+<!-- Stat 3: Progress Bar (Spans 2 cols on desktop) -->
+<div class="col-span-2 flex flex-col justify-center gap-2 rounded-2xl bg-secondary-dark/50 border border-white/5 p-4 backdrop-blur-sm">
+<div class="flex justify-between items-end">
+<span class="text-xs text-slate-300 font-medium">Daily Goal</span>
+<span class="text-xs text-primary font-bold">65%</span>
+</div>
+<div class="h-2 w-full bg-black/40 rounded-full overflow-hidden">
+<div class="h-full bg-primary shadow-glow w-[65%] rounded-full transition-all duration-500"></div>
+</div>
+</div>
+</div>
+<!-- Learning Card Container -->
+<div class="w-full max-w-lg perspective-1000">
+<div class="relative w-full bg-card-dark rounded-[2.5rem] border border-white/10 shadow-radiant p-8 md:p-10 flex flex-col gap-6 transition-transform duration-300 hover:scale-[1.01]">
+<!-- Card Header: Word & Actions -->
+<div class="flex flex-col gap-2 text-center items-center">
+<h1 class="text-4xl md:text-5xl font-bold text-white tracking-tight text-shadow-glow mb-2">Serendipity</h1>
+<div class="flex items-center gap-3">
+<span class="text-slate-400 font-body italic text-lg">/ˌser.ənˈdɪp.ə.t̬i/</span>
+<button class="flex items-center justify-center size-8 rounded-full bg-white/5 hover:bg-primary/20 text-white hover:text-primary transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">volume_up</span>
+</button>
+</div>
+</div>
+<!-- Translation Badge -->
+<div class="flex justify-center">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-200">
+<span class="material-symbols-outlined text-sm text-slate-400">translate</span>
+<span class="font-medium">नसीब (Naseeb)</span>
+</div>
+</div>
+<div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent my-1"></div>
+<!-- Context: Synonyms -->
+<div class="flex flex-col gap-3 items-center">
+<span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Synonyms</span>
+<div class="flex flex-wrap justify-center gap-2">
+<span class="px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20">Chance</span>
+<span class="px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20">Fate</span>
+<span class="px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold border border-primary/20">Luck</span>
+</div>
+</div>
+<!-- Context: Example -->
+<div class="relative mt-2 p-5 rounded-2xl bg-black/20 border border-white/5">
+<span class="absolute top-3 left-3 material-symbols-outlined text-primary/30 text-3xl select-none">format_quote</span>
+<p class="relative z-10 text-slate-300 text-center leading-relaxed font-body">
+                            "Finding $20 in your winter coat pocket isn't just luck, it's financial <strong class="text-white font-bold">serendipity</strong> that funds your next pizza."
+                        </p>
+</div>
+</div>
+</div>
+<!-- Action Dock -->
+<div class="w-full max-w-lg flex items-center justify-center gap-4 mt-2">
+<!-- I don't know button -->
+<button class="flex-1 group flex items-center justify-center gap-2 h-14 rounded-full bg-[#2a1a1a] border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-300 transition-all active:scale-95">
+<span class="material-symbols-outlined group-hover:-translate-x-1 transition-transform">close</span>
+<span class="font-bold">I don't know</span>
+<span class="hidden md:inline-block ml-1 text-xs px-1.5 py-0.5 rounded bg-red-500/20 border border-red-500/20 text-red-300">X</span>
+</button>
+<!-- I know button -->
+<button class="flex-[1.5] group flex items-center justify-center gap-2 h-14 rounded-full bg-primary text-secondary-dark hover:bg-[#4ff590] hover:shadow-glow transition-all active:scale-95">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">check</span>
+<span class="font-bold">I know this word</span>
+<span class="hidden md:inline-block ml-1 text-xs px-1.5 py-0.5 rounded bg-black/10 border border-black/5 text-secondary-dark font-mono">SPACE</span>
+</button>
+</div>
+</main>
+</div>
+</body></html>

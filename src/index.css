@@ -7,6 +7,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Retaining shadcn variables mapping but updating base values in :root */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -38,17 +40,28 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Custom App Colors */
+  --color-background-light: #f6f8f7;
+  --color-background-dark: #111714; /* Deep Forest Green */
+  --color-surface-dark: #1c2620;
+  --color-surface-border: #29382f;
+  --color-surface-highlight: #2a3b30;
+
+  --font-display: "Spline Sans", sans-serif;
+  --font-body: "Noto Sans", sans-serif;
 }
 
 :root {
-  --background: 150 10% 98%;
+  /* Default Light Mode (Using background-light) */
+  --background: 150 10% 98%; /* #f6f8f7 */
   --foreground: 150 50% 5%;
   --card: 0 0% 100%;
   --card-foreground: 150 50% 5%;
   --popover: 0 0% 100%;
   --popover-foreground: 150 50% 5%;
-  --primary: 150 70% 35%; /* Emerald Green */
-  --primary-foreground: 0 0% 100%;
+  --primary: 144 75% 55%; /* #36e27b - The new Primary Green */
+  --primary-foreground: 153 28% 8%; /* #111714 */
   --secondary: 150 20% 90%;
   --secondary-foreground: 150 50% 5%;
   --muted: 150 10% 90%;
@@ -59,39 +72,39 @@
   --destructive-foreground: 0 0% 98%;
   --border: 150 20% 90%;
   --input: 150 20% 90%;
-  --ring: 150 70% 35%;
-  --radius: 0.75rem; /* Rounded-xl look */
+  --ring: 144 75% 55%;
+  --radius: 1rem;
 }
 
 .dark {
-  /* Deep Forest Theme - Dark Mode (Your Screenshots) */
-  --background: 150 40% 3%;   /* #050b08 - Very Dark Green */
-  --foreground: 150 10% 95%;  /* #ecfdf5 - Near White */
+  /* Design Match: Deep Forest Theme */
+  --background: 153 28% 8%;   /* #111714 */
+  --foreground: 150 10% 95%;
 
-  --card: 155 35% 9%;         /* #0f1f18 - Card Surface */
+  --card: 153 15% 12%;        /* #1c2620 appx */
   --card-foreground: 150 10% 95%;
 
-  --popover: 155 35% 9%;
+  --popover: 153 15% 12%;
   --popover-foreground: 150 10% 95%;
 
-  --primary: 160 84% 39%;     /* #10b981 - Vibrant Emerald */
-  --primary-foreground: 150 40% 3%;
+  --primary: 144 75% 55%;     /* #36e27b */
+  --primary-foreground: 153 28% 8%;
 
-  --secondary: 155 30% 15%;   /* Lighter Green for buttons/hover */
+  --secondary: 155 30% 15%;
   --secondary-foreground: 150 10% 95%;
 
   --muted: 155 20% 15%;
-  --muted-foreground: 150 20% 60%; /* Muted Text */
+  --muted-foreground: 150 20% 60%;
 
-  --accent: 155 30% 15%;
+  --accent: 156 17% 20%;      /* #2a3b30 surface highlight */
   --accent-foreground: 150 10% 95%;
 
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 155 30% 15%;      /* Subtle Green Borders */
-  --input: 155 30% 15%;
-  --ring: 160 84% 39%;
+  --border: 157 15% 19%;      /* #29382f surface border */
+  --input: 157 15% 19%;
+  --ring: 144 75% 55%;
 }
 
 @layer base {
@@ -99,34 +112,26 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-display;
   }
-
 }
 
-/* Add a glassmorphism utility */
 @layer utilities {
   .glass-panel {
-    @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-lg border border-white/20 shadow-xl;
+    @apply bg-white/70 dark:bg-[#1c2620]/70 backdrop-blur-lg border border-white/20 dark:border-[#29382f] shadow-xl;
   }
-}
-@theme {
-  --font-display: "Lexend", sans-serif;
 
-  /* Your Design System Colors */
-  --color-primary: #19e66f;
-  --color-primary-foreground: #112118;
+  .text-shadow-glow {
+      text-shadow: 0 0 20px rgba(54, 226, 123, 0.3);
+  }
 
-  --color-background-light: #f6f8f7;
-  --color-background-dark: #112118;
-
-  /* Additional colors extracted from your HTML */
-  --color-card-dark: #1c2620;
-  --color-border-dark: #3c5345;
-  --color-text-muted: #9db8a9;
-
-  /* Re-map shadcn variables to your theme if needed,
-     or just use your custom ones alongside them. */
+  .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+  }
+  .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+  }
 }
 
 /* Material Symbols Utility */
@@ -148,13 +153,4 @@
 
 .material-symbols-outlined.fill {
   font-variation-settings: 'FILL' 1;
-}
-
-/* Scrollbar Hiding Utility */
-.scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
 }

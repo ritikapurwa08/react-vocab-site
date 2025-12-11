@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EnglishHub - Master English</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&amp;family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#36e27b",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#111714",
+                        "surface-dark": "#1c2620",
+                        "surface-border": "#29382f",
+                        "surface-highlight": "#2a3b30",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem", 
+                        "lg": "1.5rem", 
+                        "xl": "2rem", 
+                        "2xl": "2.5rem",
+                        "full": "9999px"
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111714; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #29382f; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #36e27b; 
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display overflow-x-hidden antialiased selection:bg-primary selection:text-background-dark">
+<div class="flex min-h-screen w-full flex-col">
+<!-- Top Navigation -->
+<div class="sticky top-0 z-50 w-full border-b border-surface-border bg-background-dark/80 backdrop-blur-md">
+<div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-10">
+<div class="flex items-center gap-3 text-white transition-opacity hover:opacity-80 cursor-pointer">
+<div class="flex items-center justify-center size-10 rounded-full bg-surface-highlight text-primary">
+<span class="material-symbols-outlined text-[24px]">school</span>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-tight">EnglishHub</h2>
+</div>
+<!-- Desktop Nav Links -->
+<nav class="hidden md:flex flex-1 justify-center gap-8">
+<a class="text-sm font-medium text-gray-300 hover:text-primary transition-colors" href="#">Courses</a>
+<a class="text-sm font-medium text-gray-300 hover:text-primary transition-colors" href="#">Tutors</a>
+<a class="text-sm font-medium text-gray-300 hover:text-primary transition-colors" href="#">Community</a>
+<a class="text-sm font-medium text-gray-300 hover:text-primary transition-colors" href="#">Pricing</a>
+</nav>
+<!-- Auth Buttons -->
+<div class="flex gap-3">
+<button class="hidden sm:flex h-10 items-center justify-center rounded-full px-5 text-sm font-bold text-white transition-colors hover:text-primary">
+                        Login
+                    </button>
+<button class="group relative flex h-10 items-center justify-center overflow-hidden rounded-full bg-primary px-6 text-background-dark text-sm font-bold shadow-[0_0_15px_rgba(54,226,123,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(54,226,123,0.5)]">
+<span class="relative z-10">Sign Up</span>
+<div class="absolute inset-0 -translate-x-full group-hover:translate-x-0 bg-white/20 transition-transform duration-300 ease-out skew-x-12 origin-left"></div>
+</button>
+</div>
+</div>
+</div>
+<!-- Main Content Wrapper -->
+<main class="flex-1 flex flex-col items-center w-full">
+<!-- Hero Section -->
+<section class="w-full max-w-7xl px-6 lg:px-10 py-12 lg:py-20">
+<div class="flex flex-col-reverse lg:flex-row gap-12 items-center">
+<!-- Hero Content -->
+<div class="flex flex-col gap-6 lg:w-1/2 items-start">
+<div class="inline-flex items-center gap-2 rounded-full border border-surface-border bg-surface-dark px-3 py-1.5">
+<span class="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-xs font-medium text-primary uppercase tracking-wide">New: Speaking Club v2.0</span>
+</div>
+<h1 class="text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500">
+                            Master English <br/>
+<span class="text-primary decoration-wavy underline decoration-from-font">at Light Speed</span>
+</h1>
+<p class="text-lg text-gray-400 max-w-lg leading-relaxed">
+                            Join 10,000+ learners unlocking fluency through gamified lessons, live tutors, and AI-powered feedback.
+                        </p>
+<div class="flex flex-wrap gap-4 pt-4">
+<button class="h-14 px-8 rounded-full bg-primary text-background-dark text-base font-bold tracking-wide hover:bg-[#2fd16f] transition-all hover:scale-105 shadow-[0_0_20px_rgba(54,226,123,0.4)]">
+                                Start Learning Now
+                            </button>
+<button class="h-14 px-8 rounded-full border border-surface-border bg-transparent text-white text-base font-bold tracking-wide hover:bg-surface-dark transition-all hover:border-primary/50">
+                                View Demo
+                            </button>
+</div>
+<div class="flex items-center gap-4 pt-6">
+<div class="flex -space-x-3">
+<div class="w-10 h-10 rounded-full border-2 border-background-dark bg-cover bg-center" data-alt="Portrait of a female user smiling" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBTHLwB9P5LXjU4KzcCFd-GkqYJ50VWseqfUkFzrnldeCjCiVTso3QkgJ2TbevoFWv9TaYnLxwpnT9EHs7Of2XZGlJrPerlg0rA3svIATX3hb6QAhKCMHpmgYDLmVciZ1sDVWCnk9Orx8YTDPGIHEMDrxyKI4U9tA-dGY5_wYtfm--fH1GTMWU3Lm-j7BlPLWef5tgnRukWqUzY7dy7MVpt1-KnOfHeJNqULw_p_KAl7jr8x1FsHLvWnBv7CJYA3kcdn3fDz6I_QoRi');"></div>
+<div class="w-10 h-10 rounded-full border-2 border-background-dark bg-cover bg-center" data-alt="Portrait of a male user smiling" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA29Wuk8iAwi1bgGOqNd2ZKGqv1R2XBjI7hN2LtWR_DNYYmTfnbwnT5FavXaJ_RybckUVZy331SLQuDgw-O-OCrrJgLgheIhYD_5bIlE2qRSAPsrRYPAchDUaRT54D081KqoARAfBa9Mt4ZsD52jrZmeZAch0OCavG90neD449Vt4rPwGzNjJtkE8c9U2eY0H6FyRcft_gpbpNitZxnZ8Ri4FQ31ljmdKmZDvA_-yGbH_lQIQ3ZWD8YUrAOAYF83EjTfk6UFDcJo0iJ');"></div>
+<div class="w-10 h-10 rounded-full border-2 border-background-dark bg-cover bg-center" data-alt="Portrait of another female user" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCW1K4cAEkFUxjXGUyXON8BL2PLKLCV9hpFFERpxXLqNn-YoAO2PqsNjW0zY2MKPyZ6QGDJ21V7Ixe-v4ykpK5NYOWd0qBvTkQ0sU5YXxAVTrOTtMxaGwjiAp5WKdUgR0wCxHVhs3nub7CSt8Y9X_NSvFYs8jjdAnza6GD0BDNjbXkMPvBXSY2EgzgOWRdK8LkDZ6-TsxSosNpTRml1eEW_iUEFY_T-NOzuflj6z1BsJOOdv5GKt_nRE-VS8hL7fGRSg0D2lvMbY1xT');"></div>
+<div class="w-10 h-10 rounded-full border-2 border-background-dark bg-surface-highlight flex items-center justify-center text-xs font-bold text-white">
+                                    +2k
+                                </div>
+</div>
+<p class="text-sm text-gray-400 font-medium">Joined this week</p>
+</div>
+</div>
+<!-- Hero Visual -->
+<div class="w-full lg:w-1/2 relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary to-emerald-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+<div class="relative w-full aspect-[4/3] rounded-2xl bg-surface-dark overflow-hidden border border-surface-border shadow-2xl">
+<div class="absolute inset-0 bg-cover bg-center" data-alt="Group of diverse students studying together around a laptop" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCAchgJ3LNO74m-HL0mgK_6E6jUPC2nlBtLzSxRIrWphIej2msO1JXBZD0Ks8tyZBUW3qzOzTadlNZX5a0AP_tqDH651wCkmI96mpxYdSm0n63ogbCDQW2wELuZJHfQOrZJ4u8RAHEKx19N-1g7kAYo-QrchUjqdGYI2t4O5nlO3oWMYej0dyo-N62AT6lCLt9T71vVeFaHafClRinzG3-Rzlhjrq3MjLe4oBaQn5exES5eBNiL_TDRGmt77IGZXicvbI-skTR1uN4o');"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
+<!-- Floating UI Elements over Image -->
+<div class="absolute bottom-6 left-6 right-6 flex items-end justify-between">
+<div class="bg-background-dark/90 backdrop-blur-md p-4 rounded-xl border border-surface-border shadow-xl w-2/3">
+<div class="flex items-center gap-3 mb-2">
+<div class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+</div>
+<span class="text-sm font-bold text-white">Your Progress</span>
+</div>
+<div class="h-2 w-full bg-surface-highlight rounded-full overflow-hidden">
+<div class="h-full w-[75%] bg-primary rounded-full"></div>
+</div>
+<div class="flex justify-between mt-2 text-xs text-gray-400">
+<span>Level B2</span>
+<span class="text-primary font-bold">75%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Bento Grid -->
+<section class="w-full max-w-7xl px-6 lg:px-10 py-12">
+<div class="flex flex-col gap-8">
+<div class="flex flex-col gap-2 md:w-2/3">
+<h2 class="text-3xl md:text-4xl font-bold tracking-tight text-white">Explore Your Hub</h2>
+<p class="text-gray-400 text-lg">Interactive modules designed to make learning addictive.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Card 1: Speaking Club -->
+<div class="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-surface-dark border border-surface-border p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,0,0,0.5)] md:col-span-2 lg:col-span-2">
+<div class="absolute top-0 right-0 p-4 opacity-50 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-surface-highlight group-hover:text-primary/10 transition-colors">mic</span>
+</div>
+<div class="flex items-center gap-3 mb-4">
+<div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-background-dark transition-colors">
+<span class="material-symbols-outlined">mic</span>
+</div>
+<span class="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-500 border border-red-500/20">
+<span class="size-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                    LIVE
+                                </span>
+</div>
+<div>
+<h3 class="text-xl font-bold text-white mb-2">Speaking Club</h3>
+<p class="text-gray-400 text-sm mb-4">Join live conversations with native speakers 24/7. Topic: "Future Technology"</p>
+<button class="w-full rounded-lg bg-surface-highlight py-2.5 text-sm font-bold text-white hover:bg-white hover:text-background-dark transition-colors">Join Room</button>
+</div>
+</div>
+<!-- Card 2: Grammar Drills -->
+<div class="group flex flex-col rounded-2xl bg-surface-dark border border-surface-border p-6 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1">
+<div class="flex items-center justify-between mb-4">
+<div class="size-10 rounded-full bg-orange-400/10 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">menu_book</span>
+</div>
+<span class="text-xs font-bold text-gray-500 bg-surface-highlight px-2 py-1 rounded">50+ New</span>
+</div>
+<h3 class="text-lg font-bold text-white mb-1">Grammar Drills</h3>
+<p class="text-gray-400 text-sm mb-4 flex-grow">Master complex rules with interactive exercises.</p>
+<div class="w-full bg-surface-highlight h-1.5 rounded-full overflow-hidden">
+<div class="bg-orange-400 h-full w-1/3"></div>
+</div>
+<p class="text-xs text-gray-500 mt-2 text-right">3/10 Completed</p>
+</div>
+<!-- Card 3: Listening Challenge -->
+<div class="group flex flex-col rounded-2xl bg-surface-dark border border-surface-border p-6 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1">
+<div class="flex items-center justify-between mb-4">
+<div class="size-10 rounded-full bg-blue-400/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">headphones</span>
+</div>
+<span class="text-xs font-bold text-gray-500 bg-surface-highlight px-2 py-1 rounded">Ep. 42</span>
+</div>
+<h3 class="text-lg font-bold text-white mb-1">Listening Lab</h3>
+<p class="text-gray-400 text-sm mb-4 flex-grow">Tune into Podcast Ep. 42 and test comprehension.</p>
+<button class="flex items-center justify-center gap-2 w-full rounded-lg border border-surface-highlight py-2 text-sm font-medium text-white hover:bg-surface-highlight transition-colors">
+<span class="material-symbols-outlined text-sm">play_arrow</span> Play
+                            </button>
+</div>
+<!-- Card 4: Word of the Day (Vertical) -->
+<div class="group flex flex-col justify-center rounded-2xl bg-gradient-to-b from-surface-dark to-surface-highlight border border-surface-border p-6 hover:border-primary/50 transition-all duration-300 md:col-span-1 lg:col-span-1 lg:row-span-1">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-sm">lightbulb</span>
+<span class="text-xs font-bold text-primary uppercase">Word of the Day</span>
+</div>
+<h3 class="text-2xl font-black text-white mb-1">Serendipity</h3>
+<p class="text-xs text-gray-400 italic mb-2">/ˌser.ənˈdɪp.ə.ti/</p>
+<p class="text-sm text-gray-300">The occurrence of events by chance in a happy or beneficial way.</p>
+</div>
+<!-- Card 5: Community -->
+<div class="group flex flex-col rounded-2xl bg-surface-dark border border-surface-border p-6 hover:border-primary/50 transition-all duration-300 md:col-span-2 lg:col-span-3">
+<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="flex -space-x-4">
+<img alt="User Avatar" class="w-12 h-12 rounded-full border-4 border-surface-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdwycr6SvB_JgeuiLVd6iaY6PFBBGXxsVksFNAzrLdzdDsBFxOEvqxBGCXVIXqCPXxcEg2BulP4Tz8wD1fMOuAJ_wUU7HgIDAu4OmQYEOKwHo0j-mmeEfC6D8hIc4D24vYYVJ9FNVuR8ULczFpqQwdl7lkb2bPXdSHwg2MesXf8IWrGyf6oV0fI-Mxq-c6_BYOY_YTg4QZL5QwKizbThp6M4RewKkqQ2KU27hyRzhJrJmzTqoccptnw1Mswqy0l_d_o4TmKW819Kzq"/>
+<img alt="User Avatar" class="w-12 h-12 rounded-full border-4 border-surface-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClOQyHGbmgcFzP9pAMe7UQV4uD7brJhTQHxeZrEp8wJqDDJYIDgV0LQCBsL7TueSSWeVe6sru4TqKfjO6AHiPtH8lI6k8TWETnQzpjD7V5Z9jacpHVxpwew2n7vnff3SdS1cGDFBMPtFjXQ4zxyTQ1LJfitDy49jiDv00i3l368y4_YvosB3xF56wERzVw2KVmiEi3WcgdhYoUtjCX5mZiuZqtt2HkocmGneR6dOxNhPOV-Po4JEusChEzH4Ve-_Ji80ZvpVG-GuBP"/>
+<img alt="User Avatar" class="w-12 h-12 rounded-full border-4 border-surface-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmrDtMF4eu5ogBmIUhvukNXqc0sUjFlnuvjeJ9KA8N4TLVDAlM3P1LTfqVHEIh5JjGqu235f6Dj8OvttCARkgc_B_-q_oazIVXz618mXEeXAVJxtqKPPhiWk_ZJZ6UFZw39LzuVtf4iEZcKYIQqJLzyuyJdW4AiZYwCgScn8s_eU1Vxf8cBX9D2qUbXawOdcBMQhtQW0EcZ2YSYoZJlo7VixaPJc11D_yyOfRtuyXmOayalXSLOGzOe96OlxfJROKyGDZaEK6LOdGv"/>
+<div class="w-12 h-12 rounded-full border-4 border-surface-dark bg-surface-highlight flex items-center justify-center text-xs font-bold text-white">+8k</div>
+</div>
+<div>
+<h3 class="text-lg font-bold text-white">Community Hub</h3>
+<p class="text-gray-400 text-sm">342 learners active now</p>
+</div>
+</div>
+<button class="rounded-full bg-white/5 px-6 py-2 text-sm font-bold text-white hover:bg-white hover:text-background-dark transition-colors border border-white/10">
+                                    Join Discussion
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Pricing Section -->
+<section class="w-full max-w-7xl px-6 lg:px-10 py-12 lg:py-20">
+<div class="flex flex-col items-center gap-10">
+<div class="text-center max-w-2xl">
+<h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Invest in Your Fluency</h2>
+<p class="text-gray-400">Choose a plan that fits your learning speed. Cancel anytime.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+<!-- Free Plan -->
+<div class="flex flex-col rounded-2xl border border-surface-border bg-surface-dark p-8 hover:border-gray-600 transition-colors">
+<h3 class="text-lg font-bold text-white mb-2">Starter</h3>
+<div class="flex items-baseline gap-1 mb-6">
+<span class="text-4xl font-black text-white">$0</span>
+<span class="text-gray-400 font-medium">/month</span>
+</div>
+<ul class="flex flex-col gap-4 mb-8 flex-1">
+<li class="flex items-center gap-3 text-sm text-gray-300">
+<span class="material-symbols-outlined text-primary text-lg">check</span>
+                                    Access to basic vocabulary
+                                </li>
+<li class="flex items-center gap-3 text-sm text-gray-300">
+<span class="material-symbols-outlined text-primary text-lg">check</span>
+                                    1 daily grammar drill
+                                </li>
+<li class="flex items-center gap-3 text-sm text-gray-300">
+<span class="material-symbols-outlined text-primary text-lg">check</span>
+                                    Community forum access
+                                </li>
+</ul>
+<button class="w-full rounded-full border border-surface-border py-3 text-sm font-bold text-white hover:bg-surface-highlight transition-colors">
+                                Get Started
+                            </button>
+</div>
+<!-- Pro Plan (Radiant) -->
+<div class="relative flex flex-col rounded-2xl bg-surface-dark p-8 border-2 border-primary shadow-[0_0_40px_-10px_rgba(54,226,123,0.3)] lg:scale-105 z-10">
+<div class="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-bold text-background-dark shadow-lg">
+                                MOST POPULAR
+                            </div>
+<h3 class="text-lg font-bold text-white mb-2">EnglishHub Pro</h3>
+<div class="flex items-baseline gap-1 mb-6">
+<span class="text-5xl font-black text-white tracking-tight">$12</span>
+<span class="text-gray-400 font-medium">/month</span>
+</div>
+<ul class="flex flex-col gap-4 mb-8 flex-1">
+<li class="flex items-center gap-3 text-sm text-white font-medium">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+                                    Unlimited Live Classes
+                                </li>
+<li class="flex items-center gap-3 text-sm text-white font-medium">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+                                    Advanced AI Grammar Analytics
+                                </li>
+<li class="flex items-center gap-3 text-sm text-white font-medium">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+                                    Offline Mode &amp; Downloads
+                                </li>
+<li class="flex items-center gap-3 text-sm text-white font-medium">
+<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
+                                    Certified Progress Certificate
+                                </li>
+</ul>
+<button class="w-full rounded-full bg-primary py-3 text-sm font-bold text-background-dark hover:bg-[#2fd16f] transition-all hover:shadow-lg hover:scale-105">
+                                Go Premium
+                            </button>
+</div>
+<!-- Team Plan -->
+<div class="flex flex-col rounded-2xl border border-surface-border bg-surface-dark p-8 hover:border-gray-600 transition-colors">
+<h3 class="text-lg font-bold text-white mb-2">Lifetime</h3>
+<div class="flex items-baseline gap-1 mb-6">
+<span class="text-4xl font-black text-white">$299</span>
+<span class="text-gray-400 font-medium">/one-time</span>
+</div>
+<ul class="flex flex-col gap-4 mb-8 flex-1">
+<li class="flex items-center gap-3 text-sm text-gray-300">
+<span class="material-symbols-outlined text-primary text-lg">check</span>
+                                    Everything in Pro forever
+                                </li>
+<li class="flex items-center gap-3 text-sm text-gray-300">
+<span class="material-symbols-outlined text-primary text-lg">check</span>
+                                    Priority 24/7 Support
+                                </li>
+<li class="flex items-center gap-3 text-sm text-gray-300">
+<span class="material-symbols-outlined text-primary text-lg">check</span>
+                                    Early access to new features
+                                </li>
+</ul>
+<button class="w-full rounded-full border border-surface-border py-3 text-sm font-bold text-white hover:bg-surface-highlight transition-colors">
+                                Contact Sales
+                            </button>
+</div>
+</div>
+</div>
+</section>
+<!-- Newsletter Footer -->
+<footer class="w-full border-t border-surface-border bg-background-dark pt-16 pb-8">
+<div class="max-w-7xl mx-auto px-6 lg:px-10">
+<div class="flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
+<div class="flex flex-col gap-4 max-w-sm">
+<div class="flex items-center gap-2 text-white">
+<span class="material-symbols-outlined text-primary text-3xl">school</span>
+<h2 class="text-xl font-bold">EnglishHub</h2>
+</div>
+<p class="text-gray-400 text-sm leading-relaxed">
+                                The most effective way to master English online. Join our community and start your journey to fluency today.
+                            </p>
+</div>
+<div class="flex flex-col gap-4 w-full md:w-auto">
+<h3 class="text-white font-bold">Subscribe to our newsletter</h3>
+<div class="flex gap-2">
+<input class="bg-surface-dark border border-surface-border text-white text-sm rounded-full px-4 py-2.5 outline-none focus:border-primary w-full md:w-64 placeholder:text-gray-600" placeholder="Enter your email" type="email"/>
+<button class="bg-primary text-background-dark font-bold text-sm px-6 py-2.5 rounded-full hover:bg-[#2fd16f] transition-colors">
+                                    Subscribe
+                                </button>
+</div>
+</div>
+</div>
+<div class="border-t border-surface-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-gray-600 text-xs">© 2024 EnglishHub Inc. All rights reserved.</p>
+<div class="flex gap-6">
+<a class="text-gray-500 hover:text-white text-sm transition-colors" href="#">Privacy</a>
+<a class="text-gray-500 hover:text-white text-sm transition-colors" href="#">Terms</a>
+<a class="text-gray-500 hover:text-white text-sm transition-colors" href="#">Cookies</a>
+</div>
+</div>
+</div>
+</footer>
+</main>
+</div>
+</body></html>
