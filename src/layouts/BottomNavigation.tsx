@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 
 import { cn } from '@/lib/utils';
-import { Icon } from './MaterialIconHelper';
+import { Icon } from '../components/ui/MaterialIconHelper';
 
 export const BottomNav = () => {
   const location = useLocation();
@@ -9,7 +9,7 @@ export const BottomNav = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-20 bg-[#1c2620] border-t border-white/10 flex justify-around items-center px-4 z-50">
+    <div className="fixed bottom-0 left-0 right-0 h-20 bg-surface-dark border-t border-white/10 flex justify-around items-center px-4 z-50">
       <Link to="/" className={cn("flex flex-col items-center justify-center gap-1 transition-colors", isActive('/') ? "text-primary" : "text-[#9db8a9] hover:text-white")}>
         <Icon name="home" />
         <span className="text-xs font-medium">Home</span>

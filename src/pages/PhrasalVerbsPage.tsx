@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import Flashcard from '../components/phrasal/Flashcard';
+import Flashcard from '../features/phrasal/components/Flashcard';
 
 export default function PhrasalVerbsPage() {
   return (
@@ -49,7 +49,7 @@ export default function PhrasalVerbsPage() {
                 <span className="text-primary font-bold">5 <span className="text-gray-400 font-normal">/ 20</span></span>
               </div>
               <div className="relative w-full h-2 bg-surface-border rounded-full overflow-hidden">
-                <div className="absolute top-0 left-0 h-full bg-primary shadow-[0_0_10px_#36e27b]" style={{ width: '25%' }}></div>
+                <div className="absolute top-0 left-0 h-full bg-primary shadow-[0_0_10px_var(--color-primary)]" style={{ width: '25%' }}></div>
               </div>
             </div>
           </div>
@@ -71,7 +71,7 @@ export default function PhrasalVerbsPage() {
                 <button className="size-14 md:size-16 rounded-full bg-surface-border text-white flex items-center justify-center hover:bg-surface-highlight active:scale-95 transition-all">
                   <span className="material-symbols-outlined text-3xl">arrow_upward</span>
                 </button>
-                <button className="size-20 rounded-full bg-primary text-black flex items-center justify-center hover:bg-[#2ecc71] hover:shadow-[0_0_20px_#36e27b] active:scale-95 transition-all shadow-[0_0_10px_rgba(54,226,123,0.4)]">
+                <button className="size-20 rounded-full bg-primary text-black flex items-center justify-center hover:bg-[#2ecc71] hover:shadow-[0_0_20px_var(--color-primary)] active:scale-95 transition-all shadow-[0_0_10px_rgba(54,226,123,0.4)]">
                   <span className="material-symbols-outlined text-4xl">arrow_downward</span>
                 </button>
               </div>

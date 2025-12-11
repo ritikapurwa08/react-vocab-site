@@ -1,6 +1,6 @@
-import Navbar from '../components/landing/Navbar';
-import IdiomCard, { type Idiom } from '../components/idioms/IdiomCard';
-import IdiomFilters from '../components/idioms/IdiomFilters';
+import Navbar from '../features/landing/components/Navbar';
+import IdiomCard, { type Idiom } from '../features/idioms/components/IdiomCard';
+import IdiomFilters from '../features/idioms/components/IdiomFilters';
 
 const MOCK_IDIOMS: Idiom[] = [
   { id: '1', phrase: 'Bite the bullet', definition: 'To force yourself to perform a difficult or unpleasant task that is inevitable.', example: '"I hate going to the dentist, but I\'ll just have to bite the bullet."', level: 'B2', category: 'General', icon: 'bolt' },

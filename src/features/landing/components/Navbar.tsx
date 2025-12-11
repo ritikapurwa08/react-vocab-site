@@ -1,6 +1,4 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-
 export default function Navbar() {
   return (
     <div className="sticky top-0 z-50 w-full border-b border-surface-border bg-background-dark/80 backdrop-blur-md">

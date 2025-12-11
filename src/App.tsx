@@ -1,14 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Dashboard from './pages/DashboardPage';
-import NotesLibrary from './pages/NotesLibraryPage';
-import ProgressTracking from './pages/ProgressPage';
-import TestSelection from './pages/TestSelectionPage';
-
 import PublicHome from './pages/PublicHome';
 import IdiomsPage from './pages/IdiomsPage';
 import PhrasalVerbsPage from './pages/PhrasalVerbsPage';
 import AuthPage from './pages/AuthPage';
 import TestPage from './pages/TestPage';
+import TestSelection from './pages/TestSelectionPage';
 import WordLearningPage from './pages/WordLearningPage';
 
 function App() {
@@ -16,9 +12,6 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<PublicHome />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/notes" element={<NotesLibrary />} />
-        <Route path="/progress" element={<ProgressTracking />} />
         <Route path="/tests" element={<TestSelection />} />
         <Route path="/test/:testId" element={<TestPage />} />
         {/* New Pages */}
