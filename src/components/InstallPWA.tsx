@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/material-icon-helper";
+import { Icon } from "@/components/MaterialIconHelper";
 import { toast } from "sonner";
 
 export function InstallPWA() {

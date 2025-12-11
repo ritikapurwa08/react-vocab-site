@@ -1,6 +1,6 @@
-import { Icon } from "@/components/material-icon-helper";
+import { Icon } from "@/components/MaterialIconHelper";
 import { Link } from "react-router-dom";
-import { BottomNav } from "@/components/bottom-navigation";
+import { BottomNav } from "@/components/BottomNavigation";
 
 export default function TestSelection() {
   return (

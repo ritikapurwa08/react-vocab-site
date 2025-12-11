@@ -1,6 +1,6 @@
-import { BottomNav } from "@/components/bottom-navigation";
-import { InstallPWA } from "@/components/intall-pwa";
-import { Icon } from "@/components/material-icon-helper";
+import { BottomNav } from "@/components/BottomNavigation";
+import { InstallPWA } from "@/components/InstallPWA";
+import { Icon } from "@/components/MaterialIconHelper";
 import { Link } from "react-router-dom";
 
 
@@ -56,7 +56,7 @@ export default function Dashboard() {
             <div className="flex flex-col items-stretch justify-start rounded-lg bg-white dark:bg-[#1c2620] overflow-hidden border border-gray-200 dark:border-transparent">
               <div
                 className="w-full bg-center bg-no-repeat aspect-[2/1] bg-cover"
-                style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuC6tbsn0CergDVjiVef_6CT6eH629T0oso_GCxgR6UDlyp-il3NgmYhnr-c-WbZXguLNjsk3zaSISh-VA8rJfUrHSBNrTF8TIKOIokn5zG1teXiX4x6yuCbgt96Op2u8QMChh3FLdS4Un4lSnT_V0akFCxhzFtxYX_InaU8f48nsJ0zxfwqMOv-0Q7fKJ8MPwG1fGv6_0Z060AkcY3LNiaH6QWKUYgvVQHpCTo7756v_MrxTxM_W4fI5WXsiui-T4mx7lBbz3Ojvwuh")'}}
+                style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuC6tbsn0CergDVjiVef_6CT6eH629T0oso_GCxgR6UDlyp-il3NgmYhnr-c-WbZXguLNjsk3zaSISh-VA8rJfUrHSBNrTF8TIKOIokn5zG1teXiX4x6yuCbgt96Op2u8QMChh3FLdS4Un4lSnT_V0akFCxhzFtxYX_InaU8f48nsJ0zxfwqMOv-0Q7fKJ8MPwG1fGv6_0Z060AkcY3LNiaH6QWKUYgvVQHpCTo7756v_MrxTxM_W4fI5WXsiui-T4mx7lBbz3Ojvwuh")' }}
               ></div>
               <div className="flex w-full grow flex-col items-stretch justify-center gap-2 p-4">
                 <p className="text-gray-900 dark:text-white text-lg font-bold leading-tight">Word Learning</p>
@@ -77,7 +77,7 @@ export default function Dashboard() {
             <div className="flex flex-col items-stretch justify-start rounded-lg bg-white dark:bg-[#1c2620] overflow-hidden border border-gray-200 dark:border-transparent">
               <div
                 className="w-full bg-center bg-no-repeat aspect-[2/1] bg-cover"
-                style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA2OvwCSApdRj99Ws-nwZVH_0PETc02_jdy6nRoNX4rKP9yahzLtr2FnmWTIgWqi4f2zmlgNM53YlnaV6NVuK45Fd3J77v8HC79fSLXD8tM9pN3F2zyV6DFPEiW-QI1rCLXAT3d98dgOBjtapf29dWXNrk9ELxMyHrzqWge0QMFoFFjhNQrjW7nlNu4Tr6yGDnW5G3d5bE1Lh5wRca9G8oTnao3OQf_1nYqbSVjlOaxMtMDT4C_eaygWlUpmnpR66xvmhqlykJvWcGN")'}}
+                style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA2OvwCSApdRj99Ws-nwZVH_0PETc02_jdy6nRoNX4rKP9yahzLtr2FnmWTIgWqi4f2zmlgNM53YlnaV6NVuK45Fd3J77v8HC79fSLXD8tM9pN3F2zyV6DFPEiW-QI1rCLXAT3d98dgOBjtapf29dWXNrk9ELxMyHrzqWge0QMFoFFjhNQrjW7nlNu4Tr6yGDnW5G3d5bE1Lh5wRca9G8oTnao3OQf_1nYqbSVjlOaxMtMDT4C_eaygWlUpmnpR66xvmhqlykJvWcGN")' }}
               ></div>
               <div className="flex w-full grow flex-col items-stretch justify-center gap-2 p-4">
                 <p className="text-gray-900 dark:text-white text-lg font-bold leading-tight">PDF Notes</p>
@@ -98,7 +98,7 @@ export default function Dashboard() {
             <div className="flex flex-col items-stretch justify-start rounded-lg bg-white dark:bg-[#1c2620] overflow-hidden border border-gray-200 dark:border-transparent">
               <div
                 className="w-full bg-center bg-no-repeat aspect-[2/1] bg-cover"
-                style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuB6zPLAvy1orthv6fs-0m_ZDFWF4m8pTKjguqKhyrreCfNIKOMebMm0MqKQqxi0RIXBbWGM65DyOzVhudX-i4po_Feyw0artNmjN-Q8awaGKEjAYP1hRwAtTzBCRC6BdYrAGhHQcs5w69gmYQaJFWGqHeNNxtdFhTmujfXuZXXPudOoLO9u0PfnjmBoZ8k02G5uoKYYBpMig4LI9ndTzgAAwcAJUCEIQSn_jEpXcP5xHyEZ2zTH6EmjZ3Uj9OUAwgkk2N_q4YVrMRRn")'}}
+                style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuB6zPLAvy1orthv6fs-0m_ZDFWF4m8pTKjguqKhyrreCfNIKOMebMm0MqKQqxi0RIXBbWGM65DyOzVhudX-i4po_Feyw0artNmjN-Q8awaGKEjAYP1hRwAtTzBCRC6BdYrAGhHQcs5w69gmYQaJFWGqHeNNxtdFhTmujfXuZXXPudOoLO9u0PfnjmBoZ8k02G5uoKYYBpMig4LI9ndTzgAAwcAJUCEIQSn_jEpXcP5xHyEZ2zTH6EmjZ3Uj9OUAwgkk2N_q4YVrMRRn")' }}
               ></div>
               <div className="flex w-full grow flex-col items-stretch justify-center gap-2 p-4">
                 <p className="text-gray-900 dark:text-white text-lg font-bold leading-tight">Tests</p>

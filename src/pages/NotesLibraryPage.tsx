@@ -1,5 +1,5 @@
 
-import { Icon } from "@/components/material-icon-helper";
+import { Icon } from "@/components/MaterialIconHelper";
 import { Link } from "react-router-dom";
 
 const notes = [

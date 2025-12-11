@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 
 import { cn } from '@/lib/utils';
-import { Icon } from './material-icon-helper';
+import { Icon } from './MaterialIconHelper';
 
 export const BottomNav = () => {
   const location = useLocation();

@@ -1,10 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Dashboard from './app_pages/dashboard-page';
-import NotesLibrary from './app_pages/notes-library';
-import ProgressTracking from './app_pages/progress-page';
-import TestSelection from './app_pages/test-selection-page';
-import TestInterface from './app_pages/test-selection-page';
-// import WordLearning from './app_pages/learning-page'; // Replaced by new one
+import Dashboard from './pages/DashboardPage';
+import NotesLibrary from './pages/NotesLibraryPage';
+import ProgressTracking from './pages/ProgressPage';
+import TestSelection from './pages/TestSelectionPage';
+
 import PublicHome from './pages/PublicHome';
 import IdiomsPage from './pages/IdiomsPage';
 import PhrasalVerbsPage from './pages/PhrasalVerbsPage';
@@ -21,7 +20,7 @@ function App() {
         <Route path="/notes" element={<NotesLibrary />} />
         <Route path="/progress" element={<ProgressTracking />} />
         <Route path="/tests" element={<TestSelection />} />
-        <Route path="/test/:testId" element={<TestInterface />} />
+        <Route path="/test/:testId" element={<TestPage />} />
         {/* New Pages */}
         <Route path="/idioms" element={<IdiomsPage />} />
         <Route path="/phrasal-verbs" element={<PhrasalVerbsPage />} />

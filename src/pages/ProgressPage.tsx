@@ -1,5 +1,5 @@
-import { BottomNav } from "@/components/bottom-navigation";
-import { Icon } from "@/components/material-icon-helper";
+import { BottomNav } from "@/components/BottomNavigation";
+import { Icon } from "@/components/MaterialIconHelper";
 
 import { Link } from "react-router-dom";
 
