@@ -1,0 +1,19 @@
+src/components/ui/BarChart.tsx(4,1): error TS6133: 'React' is declared but its value is never read.
+src/features/phrasal/components/Flashcard.tsx(4,10): error TS2305: Module '"@/types/data"' has no exported member 'PhrasalVerbData'.
+src/layouts/Navbar.tsx(11,24): error TS6133: 'Settings' is declared but its value is never read.
+src/pages/IdiomsPage.tsx(5,1): error TS6133: 'motion' is declared but its value is never read.
+src/pages/IdiomsPage.tsx(81,14): error TS2304: Cannot find name 'Icon'.
+src/pages/PhrasalVerbsPage.tsx(8,20): error TS6133: 'useEffect' is declared but its value is never read.
+src/pages/PhrasalVerbsPage.tsx(15,22): error TS2552: Cannot find name 'useNavigate'. Did you mean 'navigate'?
+src/pages/PhrasalVerbsPage.tsx(41,11): error TS6133: 'totalVerbs' is declared but its value is never read.
+src/pages/PhrasalVerbsPage.tsx(42,11): error TS6133: 'masteredCount' is declared but its value is never read.
+src/pages/PhrasalVerbsPage.tsx(73,10): error TS2304: Cannot find name 'Button'.
+src/pages/PhrasalVerbsPage.tsx(73,66): error TS2304: Cannot find name 'Button'.
+src/pages/TestPage.tsx(2,10): error TS6133: 'Link' is declared but its value is never read.
+src/pages/TestPage.tsx(159,32): error TS2304: Cannot find name 'cn'.
+src/pages/TestPage.tsx(164,37): error TS2304: Cannot find name 'cn'.
+src/pages/user-profile-page.tsx(5,16): error TS6133: 'CardContent' is declared but its value is never read.
+src/pages/user-profile-page.tsx(5,29): error TS6133: 'CardHeader' is declared but its value is never read.
+src/pages/user-profile-page.tsx(36,13): error TS2339: Property 'userId' does not exist on type '{ isLoading: boolean; isAuthenticated: boolean; }'.
+src/pages/user-profile-page.tsx(159,66): error TS2552: Cannot find name 'navigate'. Did you mean 'navigator'?
+src/pages/WordLearningPage.tsx(9,10): error TS2305: Module '"@/types/data"' has no exported member 'getMasteryColor'.

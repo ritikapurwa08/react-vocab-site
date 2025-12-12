@@ -1,39 +1,104 @@
-import { Link } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useMutation, useConvexAuth } from 'convex/react';
+import { api } from '../../convex/_generated/api';
+import { MOCK_TEST_QUESTIONS } from '@/data/vocabulary';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Icon } from '@/components/ui/MaterialIconHelper';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 export default function TestPage() {
+  const { testId } = useParams<{ testId: string }>();
+  const navigate = useNavigate();
+  const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
+  const saveTestResult = useMutation(api.wordProgress.saveTestResult);
+
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
+  const [showResult, setShowResult] = useState(false); // To show correct/incorrect after submission
+
+  useEffect(() => {
+    if (!isAuthLoading && !isAuthenticated) {
+      navigate('/auth?mode=login');
+    }
+  }, [isAuthLoading, isAuthenticated, navigate]);
+
+
+
+
+  // Filter questions based on the testId parameter
+  const testQuestions = useMemo(() => {
+    if (testId === 'comprehensive') return MOCK_TEST_QUESTIONS;
+    return MOCK_TEST_QUESTIONS.filter(q => q.testType === testId);
+  }, [testId]);
+
+  if (isAuthLoading) return <div className="flex h-screen items-center justify-center text-white">Loading...</div>;
+
+  const currentQuestion = testQuestions[currentQuestionIndex];
+  const totalQuestions = testQuestions.length;
+  const progressValue = Math.round((currentQuestionIndex / totalQuestions) * 100);
+  const selectedAnswer = userAnswers[currentQuestion?.id] || '';
+
+  const handleOptionSelect = (value: string) => {
+    if (!showResult) {
+      setUserAnswers(prev => ({ ...prev, [currentQuestion.id]: value }));
+    }
+  };
+
+  const handleSubmitAnswer = () => {
+    if (!selectedAnswer) {
+      toast.warning("Please select an answer first.");
+      return;
+    }
+
+    // Check answer and show result
+    setShowResult(true);
+  };
+
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < totalQuestions - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+      setShowResult(false);
+      // Automatically move to next word and forget the selection for the next question
+    } else {
+      // Test finished - calculate score and navigate to results/profile
+      const correctAnswers = testQuestions.filter(q => userAnswers[q.id] === q.correctAnswer).length;
+
+      saveTestResult({
+        testType: testId as "phrasal" | "idiom" | "grammar" | "vocabulary",
+        totalQuestions,
+        correctAnswers,
+      }).then(() => {
+        toast.success("Test Completed! Results saved.");
+        navigate('/profile', { state: { score: correctAnswers, total: totalQuestions, testType: testId } });
+      }).catch(e => {
+        console.error("Failed to save test result:", e);
+        toast.error("Test finished but failed to save results.");
+        navigate('/profile');
+      });
+    }
+  };
+
+  if (!testId || testQuestions.length === 0) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center bg-background-dark text-white gap-4">
+        <h1 className="text-4xl font-bold text-red-500">Test Not Found</h1>
+        <p className="text-xl text-gray-400">No questions available for test type: {testId}.</p>
+        <Button onClick={() => navigate('/tests')}>Select a Different Test</Button>
+      </div>
+    );
+  }
+
+
+
   return (
     <div className="bg-background-light dark:bg-background-dark min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-surface-border bg-background-dark/90 backdrop-blur-md">
-        <div className="px-6 lg:px-40 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 text-white">
-            <div className="flex items-center justify-center size-10 rounded-full bg-primary/20 text-primary">
-              <span className="material-symbols-outlined">school</span>
-            </div>
-            <div>
-              <h2 className="text-white text-lg font-bold leading-tight">English Master</h2>
-              <p className="text-xs text-gray-400 font-medium">Advanced Vocabulary</p>
-            </div>
-          </Link>
-
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex flex-col items-end mr-4">
-              <span className="text-xs text-primary font-bold tracking-wider uppercase mb-1">Current Streak</span>
-              <div className="flex items-center gap-1">
-                <span className="material-symbols-outlined text-orange-500 text-sm fill">local_fire_department</span>
-                <span className="text-white font-bold">12 Days</span>
-              </div>
-            </div>
-            <Button variant="ghost" className="rounded-full hover:bg-surface-border text-white group">
-              <span>Quit Test</span>
-              <span className="material-symbols-outlined ml-2 group-hover:rotate-90 transition-transform">close</span>
-            </Button>
-          </div>
-        </div>
-      </header>
+      {/* Header - Simplified to rely on global Navbar */}
 
       <main className="flex-1 flex flex-col items-center justify-start w-full px-4 md:px-6 lg:px-40 py-8 relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-primary/5 to-transparent pointer-events-none -z-10"></div>
@@ -43,71 +108,127 @@ export default function TestPage() {
           <div className="flex flex-col gap-3">
             <div className="flex items-end justify-between px-2">
               <div className="flex flex-col">
-                <span className="text-primary text-xs font-bold tracking-widest uppercase mb-1">Topic: Synonyms</span>
-                <p className="text-slate-900 dark:text-white text-xl font-bold">Question 5 of 20</p>
+                <span className="text-primary text-xs font-bold tracking-widest uppercase mb-1">Topic: {testId}</span>
+                <p className="text-white text-xl font-bold">Question {currentQuestionIndex + 1} of {totalQuestions}</p>
               </div>
               <div className="flex items-center gap-2 bg-surface-dark px-3 py-1 rounded-full border border-surface-border">
-                <span className="material-symbols-outlined text-primary text-sm">timer</span>
-                <span className="text-white text-sm font-mono">04:12</span>
+                <Icon name="timer" className="text-primary text-sm" />
+                <span className="text-white text-sm font-mono">04:12 (Mock)</span>
               </div>
             </div>
-            <Progress value={25} className="h-2 rounded-full" />
+            <Progress value={progressValue} className="h-2 rounded-full" indicatorClassName="shadow-[0_0_10px_#36e27b]" />
           </div>
 
           {/* Question Card */}
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="glass-panel p-6 md:p-10 rounded-[2rem] shadow-2xl relative overflow-hidden"
+            key={currentQuestion.id} // Key ensures motion remounts on question change
+            initial={{ x: 30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+            className="glass-panel p-6 md:p-10 rounded-[2rem] shadow-2xl relative overflow-hidden bg-surface-dark/60 backdrop-blur-lg border border-surface-border"
           >
             <div className="flex flex-col gap-8 relative z-10">
               <div className="space-y-4">
-                <h1 className="text-slate-900 dark:text-white text-2xl md:text-4xl font-bold leading-tight">
-                  Which word is the most appropriate synonym for <span className="text-primary underline decoration-2 underline-offset-4">ephemeral</span>?
+                <h1 className="text-white text-2xl md:text-4xl font-bold leading-tight">
+                  {currentQuestion.questionText.includes('**') ? (
+                    <span dangerouslySetInnerHTML={{ __html: currentQuestion.questionText.replace(/\*\*(.*?)\*\*/g, '<span class="text-primary underline decoration-2 underline-offset-4">$1</span>') }} />
+                  ) : (
+                    currentQuestion.questionText
+                  )}
                 </h1>
-                <p className="text-gray-400 text-lg">Select the best option that matches the context of fleeting time.</p>
+                {currentQuestion.contextWord && (
+                    <p className="text-gray-400 text-lg">Context: This question tests {currentQuestion.contextWord}</p>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                {['Enduring', 'Transitory', 'Eternal', 'Tangible'].map((option, idx) => {
-                  const isSelected = option === 'Transitory';
-                  return (
-                    <button
-                      key={option}
-                      className={`relative flex items-center p-4 rounded-xl border transition-all duration-200 text-left
-                                        ${isSelected
-                          ? 'border-primary bg-primary/10 shadow-[0_0_10px_rgba(54,226,123,0.3)]'
-                          : 'border-surface-border bg-surface-dark hover:bg-surface-highlight hover:border-primary/50'}`}
-                    >
-                      <div className={`flex items-center justify-center size-8 rounded-full mr-4 font-bold text-sm
-                                            ${isSelected ? 'bg-primary text-background-dark' : 'bg-surface-border text-gray-400'}`}>
+              {/* Options */}
+              <RadioGroup
+                value={selectedAnswer}
+                onValueChange={handleOptionSelect}
+                className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+              >
+                {currentQuestion.options.map((option, idx) => (
+                  <Label
+                    key={idx}
+                    htmlFor={option}
+                    className={cn(
+                      'relative flex cursor-pointer items-center justify-between p-6 rounded-full border-2 transition-all duration-200 group hover:border-white/50',
+                      selectedAnswer === option
+                        ? 'border-primary bg-surface-dark shadow-[0_0_20px_rgba(54,226,123,0.1)]' // Selected state (Green border)
+                        : 'border-white/20 bg-transparent', // Default state (White outline)
+                      showResult && option === currentQuestion.correctAnswer && 'border-green-500 bg-green-500/10',
+                      showResult && selectedAnswer === option && selectedAnswer !== currentQuestion.correctAnswer && 'border-red-500 bg-red-500/10'
+                    )}
+                  >
+                    {/* Letter Label (A, B, C...) - Absolute Left or just flex item */}
+                    <span className={cn(
+                        "text-lg font-bold w-8 text-center",
+                        selectedAnswer === option ? 'text-primary' : 'text-gray-600 group-hover:text-gray-400'
+                    )}>
                         {String.fromCharCode(65 + idx)}
-                      </div>
-                      <span className="text-white text-lg font-medium">{option}</span>
-                      {isSelected && (
-                        <div className="absolute right-4 text-primary">
-                          <span className="material-symbols-outlined">check_circle</span>
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+                    </span>
+
+                    {/* Option Text - Centered */}
+                    <span className="text-white text-lg md:text-xl font-bold text-center flex-1 px-4">
+                        {option}
+                    </span>
+
+                    {/* Radio Circle - Right */}
+                    <div className="w-8 flex justify-end">
+                         <div className={cn(
+                             "size-6 rounded-full border-2 flex items-center justify-center transition-all",
+                             selectedAnswer === option ? "border-primary" : "border-gray-500 group-hover:border-white"
+                         )}>
+                             {selectedAnswer === option && (
+                                 <div className="size-3 rounded-full bg-primary shadow-[0_0_10px_#36e27b]" />
+                             )}
+                         </div>
+                    </div>
+
+                    {/* Hidden actual radio input for accessibility */}
+                    <RadioGroupItem
+                      value={option}
+                      id={option}
+                      className='sr-only'
+                      disabled={showResult}
+                    />
+                  </Label>
+                ))}
+              </RadioGroup>
 
               <div className="flex flex-col md:flex-row items-center justify-between mt-10 pt-8 border-t border-surface-border gap-4">
                 <Button variant="ghost" className="text-gray-400 hover:text-white">
-                  <span className="material-symbols-outlined mr-2">flag</span>
+                  <Icon name="flag" />
                   Report Issue
                 </Button>
                 <div className="flex items-center gap-4 w-full md:w-auto">
-                  <Button variant="outline" className="hidden md:flex rounded-full border-surface-border px-8">Skip</Button>
-                  <Button size="lg" className="flex-1 md:flex-none rounded-full bg-primary text-background-dark font-bold hover:bg-[#2bc968] px-10">
+                  <Button variant="outline" className="hidden md:flex rounded-full border-surface-border hover:border-white px-8 transition-colors" disabled={showResult} onClick={() => handleNextQuestion()}>
+                    Skip
+                  </Button>
+                  <Button
+                    variant="glow"
+                    size="xl"
+                    className="flex-1 md:flex-none px-10"
+                    disabled={!selectedAnswer || showResult}
+                    onClick={handleSubmitAnswer}
+                  >
                     Submit Answer
                   </Button>
+                  {showResult && (
+                    <Button
+                        size="lg"
+                        className="flex-1 md:flex-none rounded-full font-bold px-10 bg-blue-500 hover:bg-blue-400 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all"
+                        onClick={handleNextQuestion}
+                    >
+                        {currentQuestionIndex === totalQuestions - 1 ? 'Finish Test' : 'Next Question'}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
           </motion.div>
+
+          {/* Section for next challenges - remove this complexity for now to simplify UI */}
         </div>
       </main>
     </div>

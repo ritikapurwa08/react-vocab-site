@@ -46,10 +46,10 @@ export default function IdiomCard({ idiom }: { idiom: Idiom }) {
 
       <div className="flex items-center justify-between pt-2 border-t border-surface-border">
         <div className="flex gap-2">
-          <button className="flex items-center justify-center size-8 rounded-full hover:bg-surface-border text-gray-400 hover:text-white transition-colors">
+          <button className="flex items-center justify-center size-8 rounded-full bg-white/5 hover:bg-surface-border text-gray-400 hover:text-white transition-colors">
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>volume_up</span>
           </button>
-          <button className="flex items-center justify-center size-8 rounded-full hover:bg-surface-border text-gray-400 hover:text-white transition-colors">
+          <button className="flex items-center justify-center size-8 rounded-full bg-white/5 hover:bg-surface-border text-gray-400 hover:text-white transition-colors">
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>content_copy</span>
           </button>
         </div>
