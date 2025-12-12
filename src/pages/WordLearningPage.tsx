@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Icon } from '@/components/ui/MaterialIconHelper';
 import { getMasteryColor } from '@/data/data-type';
-import { cn } from "@/lib/utils";
+
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,56 +22,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import type { Id } from 'convex/_generated/dataModel';
+import { cn } from '@/lib/utils';
 
 // ... (rest of imports)
 
 // Inside component render...
 
-                            {/* Hindi Meanings - Responsive Layout */}
-                            <div className={cn(
-                                // Mobile styles: Horizontal scroll, single line
-                                "w-full overflow-x-auto scrollbar-hide flex items-center gap-2",
-                                // Desktop styles: No scroll, wrap, centered
-                                "md:overflow-visible md:flex-wrap md:justify-center md:w-full"
-                            )}>
-                                {currentWord.hindiMeanings.map((meaning: string, idx: number) => (
-                                    <div
-                                        key={idx}
-                                        className="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-primary/20 border border-primary/40 text-primary shadow-sm hover:shadow-primary/20 transition-shadow shrink-0"
-                                    >
-                                        <span className="font-semibold text-sm md:text-base whitespace-nowrap">{meaning}</span>
-                                    </div>
-                                ))}
-                                <button
-                                    onClick={() => handleOpenDialog('hindi')}
-                                    className="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-primary/10 border border-primary/30 border-dashed text-primary/80 hover:bg-primary/20 hover:border-primary/50 transition-all shrink-0"
-                                    title="Add Hindi meaning"
-                                >
-                                    <span className="font-medium text-sm md:text-base whitespace-nowrap">+ Add</span>
-                                </button>
-                            </div>
-
-// ...
-
-                            {/* Synonyms - Responsive Layout */}
-                            {currentWord.synonyms && currentWord.synonyms.length > 0 && (
-                                <div className="w-full mt-3 md:mt-4">
-                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
-                                        Synonyms
-                                    </span>
-                                    <div className={cn(
-                                        // Mobile styles: Horizontal scroll, single line
-                                        "w-full overflow-x-auto scrollbar-hide flex items-center gap-2",
-                                        // Desktop styles: No scroll, wrap, left-aligned
-                                        "md:overflow-visible md:flex-wrap md:justify-start md:w-full"
-                                    )}>
-                                        {currentWord.synonyms.map((synonym: string, idx: number) => (
-                                            <div
-// ...
-
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import type { Id } from 'convex/_generated/dataModel';
 
 export default function WordLearningPage() {
   const navigate = useNavigate();
@@ -318,9 +275,13 @@ export default function WordLearningPage() {
                                 <span className="break-all">{currentWord.word}</span>
                             </h1>
 
-                            {/* Hindi Meanings - Scrollable on Mobile, Wrapped on Desktop */}
-                            <div className="w-full overflow-x-auto md:overflow-x-visible scrollbar-hide">
-                                <div className="flex md:flex-wrap items-center gap-2 w-max md:w-full min-w-full md:min-w-0 justify-center">
+                            {/* Hindi Meanings - Responsive Layout */}
+                            <div className={cn(
+                                // Mobile: scrollable, single line
+                                "w-full overflow-x-auto scrollbar-hide flex items-center gap-2",
+                                // Desktop: wrapping, centered, full width
+                                "md:overflow-visible md:flex-wrap md:justify-center md:w-full"
+                            )}>
                                     {currentWord.hindiMeanings.map((meaning: string, idx: number) => (
                                         <div
                                             key={idx}
@@ -336,7 +297,7 @@ export default function WordLearningPage() {
                                     >
                                         <span className="font-medium text-sm md:text-base whitespace-nowrap">+ Add</span>
                                     </button>
-                                </div>
+
                             </div>
                         </div>
 
@@ -370,8 +331,12 @@ export default function WordLearningPage() {
                                     <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
                                         Synonyms
                                     </span>
-                                    <div className="w-full overflow-x-auto md:overflow-x-visible scrollbar-hide">
-                                        <div className="flex md:flex-wrap items-center gap-2 w-max md:w-full min-w-0 md:justify-start">
+                                    <div className={cn(
+                                        // Mobile: scrollable, single line
+                                        "w-full overflow-x-auto scrollbar-hide flex items-center gap-2",
+                                        // Desktop: wrapping, left-aligned, full width
+                                        "md:overflow-visible md:flex-wrap md:justify-start md:w-full"
+                                    )}>
                                             {currentWord.synonyms.map((synonym: string, idx: number) => (
                                                 <div
                                                     key={idx}
@@ -388,7 +353,7 @@ export default function WordLearningPage() {
                                                 <span className="font-medium text-sm md:text-base whitespace-nowrap">+ Add</span>
                                             </button>
                                         </div>
-                                    </div>
+
                                 </div>
                             )}
                         </div>
