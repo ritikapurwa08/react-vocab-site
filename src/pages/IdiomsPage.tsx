@@ -2,8 +2,9 @@ import IdiomCard, { type Idiom } from '../features/idioms/components/IdiomCard';
 import IdiomFilters from '../features/idioms/components/IdiomFilters';
 import { MOCK_IDIOMS } from '@/data/vocabulary'; // Import the new mock data
 import { Link, useNavigate } from 'react-router-dom';
-import { useConvexAuth } from 'convex/react';
-import { useEffect, useState } from 'react';
+import { useConvexAuth, useQuery, useMutation } from 'convex/react';
+import { useEffect, useState, useMemo } from 'react';
+import { api } from '../../convex/_generated/api';
 
 import { Icon } from '@/components/ui/MaterialIconHelper';
 
@@ -24,13 +25,49 @@ export default function IdiomsPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Fetch user progress for idioms
+  const rawProgressData = useQuery(api.wordProgress.getProgress, { contentType: "idiom" });
+  const updateProgress = useMutation(api.wordProgress.updateProgress);
+
+  // Map progress data
+  const progressMap = useMemo(() => {
+    const map = new Map<string, number>();
+    (rawProgressData || []).forEach((p: any) => map.set(p.contentId, p.masteryLevel));
+    return map;
+  }, [rawProgressData]);
+
+  // Merge progress with idioms
+  const idiomListWithProgress = useMemo(() => {
+      return IdiomList.map((idiom: Idiom) => ({
+          ...idiom,
+          masteryLevel: progressMap.get(idiom.id) || 0,
+      }));
+  }, [progressMap]);
+
   // Filter logic
-  const filteredIdioms = IdiomList.filter(idiom =>
+  const filteredIdioms = idiomListWithProgress.filter((idiom: Idiom) =>
     idiom.phrase.toLowerCase().includes(searchTerm.toLowerCase()) ||
     idiom.definition.toLowerCase().includes(searchTerm.toLowerCase()) ||
     idiom.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleToggleMastery = async (idiomId: string, currentLevel: number) => {
+      // Toggle: If learned (>=3), reset to 0. If not, set to 5 (mastered).
+      const newLevel = currentLevel >= 3 ? 0 : 5;
+      await updateProgress({
+          contentId: idiomId,
+          contentType: "idiom",
+          contentNumber: 1, // Placeholder, ideally specific index
+          action: newLevel === 5 ? 'master' : 'unknown'
+      });
+  };
+
+  // Re-checking updateProgress signature from context if possible, or assuming standard action.
+  // standard action: 'known' increments level. 'unknown' resets.
+  // To "Mark as Learned" instantly, we might need to hit 'known' multiple times or add a 'master' action.
+  // Let's stick to 'known' for now, it implies "I know this".
+
+  // Move useEffect here to respect Hook rules
   useEffect(() => {
     if (!isAuthLoading && !isAuthenticated) {
       navigate('/auth?mode=login');
@@ -78,7 +115,11 @@ export default function IdiomsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredIdioms.map(idiom => (
-                <IdiomCard key={idiom.id} idiom={idiom} />
+                <IdiomCard
+                    key={idiom.id}
+                    idiom={idiom}
+                    onToggle={() => handleToggleMastery(idiom.id, idiom.masteryLevel || 0)}
+                />
               ))}
             </div>
 

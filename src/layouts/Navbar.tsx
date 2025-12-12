@@ -13,7 +13,8 @@ import { Icon } from '@/components/ui/MaterialIconHelper';
 
 export default function Navbar() {
   const { pathname } = useLocation();
-  const { isAuthenticated } = useConvexAuth();
+  const { isAuthenticated, isLoading } = useConvexAuth();
+
   const { signOut } = useAuthActions();
 
   const navLinks = [
@@ -56,7 +57,9 @@ export default function Navbar() {
 
         {/* Auth / Profile Buttons */}
         <div className="flex gap-3 items-center">
-          {isAuthenticated ? (
+          {isLoading ? (
+            <div className="h-10 w-24 bg-surface-dark/50 rounded-full animate-pulse" />
+          ) : isAuthenticated ? (
             <>
             <Button variant="ghost" size="icon" className="rounded-full text-gray-300 hover:text-white hover:bg-white/10 hidden sm:flex">
                 <Icon name="notifications" className="text-xl" />
@@ -86,7 +89,7 @@ export default function Navbar() {
               <Link to="/auth?mode=login" className="hidden sm:flex h-10 items-center justify-center rounded-full px-5 text-sm font-bold text-white transition-colors hover:text-primary">
                 Login
               </Link>
-              <Link to="/auth?mode=signup" className="group relative flex h-10 items-center justify-center overflow-hidden rounded-full bg-primary px-6 text-background-dark text-sm font-bold shadow-[0_0_15px_rgba(54,226,123,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(54,226,123,0.5)]">
+              <Link to="/auth?mode=signup" className="group relative flex h-10 items-center justify-center overflow-hidden rounded-full bg-primary px-6 text-background-light hover:text-teal-400 text-sm font-bold shadow-[0_0_15px_rgba(54,226,123,0.3)] transition-all hover:scale-105 hover:shadow-[0_0_25px_rgba(54,226,123,0.5)]">
                 <span className="relative z-10">Sign Up</span>
                 <div className="absolute inset-0 -translate-x-full group-hover:translate-x-0 bg-white/20 transition-transform duration-300 ease-out skew-x-12 origin-left"></div>
               </Link>

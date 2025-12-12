@@ -18,7 +18,7 @@ export default function Flashcard({ verbData }: FlashcardProps) {
   return (
     <div className="flex-1 relative group perspective-1000 min-h-[500px]">
       <motion.div
-        className="relative w-full h-full min-h-[500px] flex flex-col bg-surface-dark rounded-[2rem] border border-surface-border shadow-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_0_30px_rgba(54,226,123,0.1)]"
+        className="relative w-full h-full min-h-[500px] flex flex-col bg-surface-dark rounded-4xl border border-surface-border shadow-2xl overflow-hidden transition-all duration-500 hover:shadow-[0_0_30px_rgba(54,226,123,0.1)]"
         initial={false}
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ duration: 0.6, type: 'spring', stiffness: 260, damping: 20 }}

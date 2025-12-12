@@ -8,17 +8,31 @@ export interface Idiom {
   level: string;
   category: string;
   icon: string;
+  masteryLevel?: number;
 }
 
-export default function IdiomCard({ idiom }: { idiom: Idiom }) {
+export default function IdiomCard({ idiom, onToggle }: { idiom: Idiom; onToggle?: () => void }) {
+  const isLearned = (idiom.masteryLevel || 0) >= 3;
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className="group relative flex flex-col gap-4 rounded-xl border border-surface-border bg-surface-dark p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(54,226,123,0.1)]"
+      className={`group relative flex flex-col gap-4 rounded-xl border ${
+        isLearned ? 'border-primary/50 bg-primary/5' : 'border-surface-border bg-surface-dark'
+      } p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(54,226,123,0.1)]`}
     >
-      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button className="text-gray-400 hover:text-primary transition-colors">
-          <span className="material-symbols-outlined">bookmark_add</span>
+      <div className="absolute top-4 right-4 z-10">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle?.();
+          }}
+          className={`transition-colors ${isLearned ? 'text-primary' : 'text-gray-600 hover:text-primary'}`}
+          title={isLearned ? "Mark as unknown" : "Mark as learned"}
+        >
+          <span className="material-symbols-outlined text-2xl">
+            {isLearned ? 'check_circle' : 'circle'}
+          </span>
         </button>
       </div>
 

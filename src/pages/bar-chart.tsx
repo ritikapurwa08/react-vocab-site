@@ -74,13 +74,4 @@ export function SimpleBarChart({ data, title, description, className, barColor =
     );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const MOCK_WEEKLY_ACTIVITY_DATA = [
-    { name: 'Mon', value: 30 },
-    { name: 'Tue', value: 65 },
-    { name: 'Wed', value: 80 },
-    { name: 'Thu', value: 25 },
-    { name: 'Fri', value: 55 },
-    { name: 'Sat', value: 90 },
-    { name: 'Sun', value: 30 },
-];
+

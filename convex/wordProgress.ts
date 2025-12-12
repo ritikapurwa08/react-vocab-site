@@ -8,12 +8,12 @@ const ContentArgs = {
   contentId: v.string(),
   contentType: v.union(v.literal("word"), v.literal("phrasal"), v.literal("idiom")),
   contentNumber: v.number(),
-  action: v.union(v.literal("known"), v.literal("unknown")),
+  action: v.union(v.literal("known"), v.literal("unknown"), v.literal("master")),
 } as const;
 
 /**
  * Updates or inserts a user's progress on a piece of content.
- * 'known' increments mastery; 'unknown' sets to 1 (needs review).
+ * 'known' increments mastery; 'unknown' sets to 1 (needs review); 'master' sets to 5.
  */
 export const updateProgress = mutation({
   args: ContentArgs,
@@ -36,6 +36,9 @@ export const updateProgress = mutation({
     if (args.action === "known") {
         // Mastery level increases, capped at 5
         newMasteryLevel = Math.min(5, currentMastery + 1);
+    } else if (args.action === "master") {
+        // Instantly mark as mastered
+        newMasteryLevel = 5;
     } else {
         // 'Unknown' resets mastery to 1 (needs initial review) or keeps it 0 if new.
         newMasteryLevel = currentMastery > 0 ? 1 : 0;
@@ -161,9 +164,32 @@ export const getUserProfileStats = query({
             }
         });
 
-        // 3. Weekly Activity (Mock Data or implement real date logic)
-        // For simplicity and quick implementation, we will mock the weekly activity on the front end,
-        // but this framework shows where real weekly data from `user_test_stats` would be processed.
+        // 3. Weekly Activity (Real Data)
+        const ONE_DAY = 24 * 60 * 60 * 1000;
+        const now = Date.now();
+        const last7Days = Array.from({ length: 7 }, (_, i) => {
+            const date = new Date(now - (6 - i) * ONE_DAY);
+            return {
+                dayName: date.toLocaleDateString('en-US', { weekday: 'short' }), // Mon, Tue...
+                startTime: new Date(date.setHours(0, 0, 0, 0)).getTime(),
+                endTime: new Date(date.setHours(23, 59, 59, 999)).getTime()
+            };
+        });
+
+        // Get all tests for the user (we already have 'tests' fetched above)
+        // Aggregate score/activity per day
+        const weeklyActivity = last7Days.map(day => {
+            const dayTests = tests.filter(t => t.date >= day.startTime && t.date <= day.endTime);
+            // define "activity" as total points (score * count) or just sum of scores?
+            // Let's use sum of correct answers as "points" for now, or just sum of scores.
+            // Let's use sum of scores to match the "Activity Score" label.
+            const dayScore = dayTests.reduce((sum, t) => sum + (t.score || 0), 0);
+            return {
+                name: day.dayName,
+                value: dayScore
+            };
+        });
+
 
         // 4. Accuracy Rate (Average of all test scores)
         const totalScoreSum = tests.reduce((sum, t) => sum + t.score, 0);
@@ -183,6 +209,7 @@ export const getUserProfileStats = query({
             averageAccuracy,
             totalQuestionsAttempted,
             nextWordNumber,
+            weeklyActivity, // New field
             // Example of a derived stat for needs review
             needsReviewCount: allProgress.filter(p => p.masteryLevel > 0 && p.masteryLevel < 3).length,
         };

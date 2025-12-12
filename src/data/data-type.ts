@@ -27,6 +27,7 @@ export interface WordData extends BaseContent {
   sentence: string;       // Example sentence
   masteryLevel: number;   // 0-5 for tracking progress
   step: number;           // Word's original index/number in its list
+  isFavorite?: boolean;   // Optional favorite flag
 }
 
 // --- Phrasal Verb Content ---

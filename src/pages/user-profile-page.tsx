@@ -4,7 +4,7 @@ import { useConvexAuth } from "convex/react";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { SimpleBarChart, MOCK_WEEKLY_ACTIVITY_DATA } from '@/components/ui/BarChart';
+import { SimpleBarChart } from '@/components/ui/BarChart';
 import { Icon } from '@/components/ui/MaterialIconHelper';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -64,7 +64,8 @@ export default function UserProfilePage() {
     const stats = profileStats || {
         name: "Loading...", email: "...", image: "",
         totalTestsCovered: 0, wordsKnown: 0, phrasalKnown: 0, idiomsKnown: 0,
-        averageAccuracy: 0, totalQuestionsAttempted: 0, needsReviewCount: 0, nextWordNumber: 1
+        averageAccuracy: 0, totalQuestionsAttempted: 0, needsReviewCount: 0, nextWordNumber: 1,
+        weeklyActivity: []
     };
 
     return (
@@ -157,7 +158,7 @@ export default function UserProfilePage() {
                         <SimpleBarChart
                             title="Weekly Activity Score"
                             description="Based on engagement and test performance."
-                            data={MOCK_WEEKLY_ACTIVITY_DATA}
+                            data={stats.weeklyActivity || []}
                         />
 
                         {/* Next Learning Step */}

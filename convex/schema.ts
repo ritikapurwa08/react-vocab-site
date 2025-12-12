@@ -1,4 +1,5 @@
 import { defineSchema, defineTable } from "convex/server";
+// Force sync
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
 
@@ -21,6 +22,21 @@ export default defineSchema({
     .index("by_user_content", ["userId", "contentId", "contentType"]) // Primary lookup for specific item
     .index("by_user_type_number", ["userId", "contentType", "contentNumber"]) // For tracking next item to learn
     .index("by_user", ["userId"]), // For general user stats
+
+  // Global words table (migrated from local JSON)
+  words: defineTable({
+    word: v.string(),
+    meaning: v.string(), // English definition
+    hindiMeanings: v.array(v.string()),
+    synonyms: v.array(v.string()),
+    sentence: v.string(),
+    step: v.number(), // The unique number/index of the word (1 to 600+)
+    level: v.string(), // e.g. "B2", "C1"
+    type: v.string(),  // usually "word"
+    isFavorite: v.optional(v.boolean()), // defaults to false in app logic
+  })
+    .index("by_step", ["step"]) // To fetch sequential batches
+    .index("by_word", ["word"]), // To check existence
 
   // New table to track test results for scoring/leaderboards
   user_test_stats: defineTable({

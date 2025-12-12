@@ -14,6 +14,19 @@ export default function WordLearningPage() {
 
   // Fetch user progress for words
   const rawProgressData = useQuery(api.wordProgress.getProgress, { contentType: "word" });
+
+  // Calculate start step for smart resume (find max learned step + 1)
+  const startStep = useMemo(() => {
+      if (!rawProgressData) return 1;
+      const learned = rawProgressData.filter(p => p.masteryLevel >= 3);
+      if (learned.length === 0) return 1;
+      return Math.max(...learned.map(p => p.contentNumber)) + 1;
+  }, [rawProgressData]);
+
+  // Fetch words from Convex
+  const wordsData = useQuery(api.words.getWords, { limit: 100, startStep });
+
+  // Fetch user progress for words (already declared)
   const updateProgress = useMutation(api.wordProgress.updateProgress);
 
   // Redirect if not authenticated
@@ -23,24 +36,27 @@ export default function WordLearningPage() {
     }
   }, [isAuthLoading, isAuthenticated, navigate]);
 
-  // Map progress data to a lookup map and find the next step
+  // Map progress data to a lookup map
   const progressMap = useMemo(() => {
     const map = new Map<string, number>();
     (rawProgressData || []).forEach(p => map.set(p.contentId, p.masteryLevel));
     return map;
   }, [rawProgressData]);
 
-  // Compute words for session: Sort by step and filter out fully mastered words (level >= 3)
+  // Compute words for session
   const wordsForSession = useMemo(() => {
-    return MOCK_WORD_LIST
+    if (!wordsData) return [];
+
+    // Map Convex docs to WordData structure (using _id as id)
+    return wordsData
         .map(word => ({
             ...word,
-            masteryLevel: progressMap.get(word.id) || 0,
+            id: word._id, // Use Convex ID
+            masteryLevel: progressMap.get(word._id) || 0,
         }))
         // Filter: Show all words that are not fully mastered (mastery < 3)
-        // This ensures strict sequential order (1, 2, 3...) based on MOCK_WORD_LIST order
         .filter(word => word.masteryLevel < 3);
-  }, [progressMap]);
+  }, [progressMap, wordsData]);
 
   // Current word state
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -51,14 +67,46 @@ export default function WordLearningPage() {
     setCurrentIndex(0); // Reset if current index is out of bounds
   }
 
-  // Progress stats
-  const totalWords = MOCK_WORD_LIST.length;
-  const learnedCount = MOCK_WORD_LIST.filter(word => (progressMap.get(word.id) || 0) >= 3).length;
-  const wordsToReview = MOCK_WORD_LIST.filter(word => (progressMap.get(word.id) || 0) >= 1 && (progressMap.get(word.id) || 0) < 3).length;
-  const progressPercentage = Math.round((learnedCount / totalWords) * 100);
+  // Stats calculation based on loaded words
+  const totalWords = wordsData ? wordsData.length : 0; // Currently only loaded batch
+  const learnedCount = wordsData ? wordsData.filter(word => (progressMap.get(word._id) || 0) >= 3).length : 0;
+  const wordsToReview = wordsData ? wordsData.filter(word => (progressMap.get(word._id) || 0) >= 1 && (progressMap.get(word._id) || 0) < 3).length : 0;
+  // Note: progressPercentage here is only for the *loaded batch*, not global.
+  // For global, we might need a separate query for total count.
+  const progressPercentage = totalWords > 0 ? Math.round((learnedCount / totalWords) * 100) : 0;
+
+  // Deliberation & Audio Logic
+  const [isDeliberating, setIsDeliberating] = useState(true);
+  const [timeLeft, setTimeLeft] = useState(3);
+
+  useEffect(() => {
+    if (currentWord) {
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setIsDeliberating(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [currentWord]);
+
+  const playAudio = (text: string) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    window.speechSynthesis.speak(utterance);
+  };
 
   const handleAction = async (action: 'known' | 'unknown') => {
-    if (!currentWord) return;
+    if (!currentWord || isDeliberating) return;
+
+    // Reset deliberation for next word
+    setIsDeliberating(true);
+    setTimeLeft(3);
 
     await updateProgress({
       contentId: currentWord.id,
@@ -75,7 +123,7 @@ export default function WordLearningPage() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!currentWord) return;
+      if (!currentWord || isDeliberating) return;
       if (e.code === 'Space') {
         e.preventDefault();
         handleAction('known');
@@ -85,9 +133,10 @@ export default function WordLearningPage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentWord]);
+  }, [currentWord, isDeliberating]);
 
-  if (isAuthLoading || !isAuthenticated) return <div className="flex h-screen items-center justify-center text-white">Loading...</div>;
+  const isLoadingWords = wordsData === undefined;
+  if (isAuthLoading || !isAuthenticated || isLoadingWords) return <div className="flex h-screen items-center justify-center text-white">Loading Vocabulary...</div>;
 
   if (wordsForSession.length === 0) {
     return (
@@ -149,10 +198,19 @@ export default function WordLearningPage() {
             {/* Left Column: Word & Identity */}
             <div className="flex flex-col gap-6 text-center items-center justify-center h-full">
               <div className="flex flex-col items-center">
-                <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight text-shadow-glow mb-4">{currentWord.word}</h1>
+                <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight text-shadow-glow mb-4 flex items-center gap-4">
+                    {currentWord.word}
+                    <button
+                        onClick={() => playAudio(currentWord.word)}
+                        className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all transform hover:scale-110 active:scale-95"
+                        title="Listen to pronunciation"
+                    >
+                        <Icon name="volume_up" className="text-3xl" />
+                    </button>
+                </h1>
 
                 <div className="flex flex-wrap items-center justify-center gap-2">
-                    {currentWord.hindiMeanings.map((meaning, idx) => (
+                    {currentWord.hindiMeanings.map((meaning: string, idx: number) => (
                       <div key={idx} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-slate-200">
                           {idx === 0 && <Icon name="translate" className="text-sm text-slate-400" />}
                           <span className="font-medium text-lg">{meaning}</span>
@@ -195,7 +253,8 @@ export default function WordLearningPage() {
           <Button
             variant="outline"
             onClick={() => handleAction('unknown')}
-            className="flex-1 h-14 rounded-full border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all"
+            disabled={isDeliberating}
+            className="flex-1 h-14 rounded-full border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all disabled:opacity-50 disabled:cursor-wait"
           >
             <Icon name="close" />
             I need review (X)
@@ -204,10 +263,20 @@ export default function WordLearningPage() {
             onClick={() => handleAction('known')}
             variant="glow"
             size="xl"
-            className="flex-[1.5] transition-all"
+            disabled={isDeliberating}
+            className="flex-[1.5] transition-all disabled:opacity-50 disabled:cursor-wait"
           >
-            <Icon name="check" />
-            I know this word (Space)
+            {isDeliberating ? (
+                <span className="flex items-center gap-2">
+                    <Icon name="hourglass_empty" className="animate-spin" />
+                    Wait {timeLeft}s...
+                </span>
+            ) : (
+                <>
+                <Icon name="check" />
+                I know this word (Space)
+                </>
+            )}
           </Button>
         </div>
       </main>

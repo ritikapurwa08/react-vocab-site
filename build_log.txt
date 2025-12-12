@@ -1,4 +1,0 @@
-convex/auth.ts(3,9): error TS1484: 'DataModel' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-src/pages/WordLearningPage.tsx(4,1): error TS6133: 'useAuthActions' is declared but its value is never read.
-src/pages/WordLearningPage.tsx(126,78): error TS2322: Type '{ value: number; className: string; indicatorClassName: string; }' is not assignable to type 'IntrinsicAttributes & ProgressProps & RefAttributes<HTMLDivElement>'.
-  Property 'indicatorClassName' does not exist on type 'IntrinsicAttributes & ProgressProps & RefAttributes<HTMLDivElement>'.

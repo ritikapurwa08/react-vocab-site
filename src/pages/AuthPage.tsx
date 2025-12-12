@@ -114,9 +114,24 @@ export default function AuthPage() {
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background-light dark:bg-background-dark p-6">
+      <motion.div
+        animate={{
+          background: mode === 'login' ? 'radial-gradient(circle at 100% 0%, rgba(54,226,123,0.1) 0%, transparent 50%)' : 'radial-gradient(circle at 0% 100%, rgba(59,130,246,0.1) 0%, transparent 50%)'
+        }}
+        className="absolute inset-0 pointer-events-none transition-colors duration-1000"
+      />
+
       {/* Background Effects */}
-      <div className="absolute top-[-20%] right-[-10%] h-[800px] w-[800px] rounded-full bg-primary/5 blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[-20%] left-[-10%] h-[600px] w-[600px] rounded-full bg-primary/5 blur-[100px] pointer-events-none"></div>
+      <motion.div
+        animate={{ x: mode === 'login' ? 0 : 50, y: mode === 'login' ? 0 : -50 }}
+        transition={{ duration: 1.5, type: 'spring' }}
+        className="absolute top-[-20%] right-[-10%] h-[800px] w-[800px] rounded-full bg-primary/5 blur-[120px] pointer-events-none"
+      ></motion.div>
+      <motion.div
+        animate={{ x: mode === 'login' ? 0 : -50, y: mode === 'login' ? 0 : 50 }}
+        transition={{ duration: 1.5, type: 'spring' }}
+        className="absolute bottom-[-20%] left-[-10%] h-[600px] w-[600px] rounded-full bg-blue-500/5 blur-[100px] pointer-events-none"
+      ></motion.div>
 
       <div className="w-full max-w-[1100px] grid lg:grid-cols-2 gap-12 lg:gap-20 items-center z-10">
         {/* Left Column: Hero Text */}
@@ -168,7 +183,7 @@ export default function AuthPage() {
                                 <div
                                   key={avatar}
                                   onClick={() => field.onChange(avatar)}
-                                  className={`relative cursor-pointer rounded-full p-1 border-2 transition-all shrink-0 ${field.value === avatar ? 'border-primary bg-primary/10' : 'border-transparent hover:bg-white/5'}`}
+                                  className={`relative cursor-pointer rounded-full p-1 border-2 transition-all shrink-0 ${field.value === avatar ? 'border-primary bg-primary/10' : 'border-accent  hover:bg-white/5'}`}
                                 >
                                   <img src={avatar} alt="avatar" className="size-10 rounded-full" />
                                   {field.value === avatar && (
@@ -192,7 +207,7 @@ export default function AuthPage() {
                             <FormLabel>Full Name</FormLabel>
                             <div className="relative">
                               <FormControl>
-                                <Input placeholder="John Doe" className="pl-10 bg-input-dark border-surface-border" {...field} />
+                                <Input placeholder="John Doe" className="pl-10 bg-input-dark border-surface-border focus:border-green-500 focus:ring-0" {...field} />
                               </FormControl>
                               <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                             </div>
