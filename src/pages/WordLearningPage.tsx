@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useConvexAuth } from 'convex/react';
 import { api } from '../../convex/_generated/api';
@@ -7,27 +7,38 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Icon } from '@/components/ui/MaterialIconHelper';
 import { getMasteryColor } from '@/data/data-type';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import type { Id } from 'convex/_generated/dataModel';
 
 export default function WordLearningPage() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
 
-  // Fetch user progress for words
+  // Dialog state for adding meanings/synonyms
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState<'hindi' | 'synonym'>('hindi');
+  const [inputValue, setInputValue] = useState('');
+
+  // Fetch words from Convex (Smart Resume)
+  const wordsData = useQuery(api.words.getNextWords);
+
+  // Fetch user progress for words (needed for UI state)
   const rawProgressData = useQuery(api.wordProgress.getProgress, { contentType: "word" });
-
-  // Calculate start step for smart resume (find max learned step + 1)
-  const startStep = useMemo(() => {
-      if (!rawProgressData) return 1;
-      const learned = rawProgressData.filter(p => p.masteryLevel >= 3);
-      if (learned.length === 0) return 1;
-      return Math.max(...learned.map(p => p.contentNumber)) + 1;
-  }, [rawProgressData]);
-
-  // Fetch words from Convex
-  const wordsData = useQuery(api.words.getWords, { limit: 100, startStep });
 
   // Fetch user progress for words (already declared)
   const updateProgress = useMutation(api.wordProgress.updateProgress);
+  const addContributions = useMutation(api.words.addWordContributions);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -67,12 +78,16 @@ export default function WordLearningPage() {
     setCurrentIndex(0); // Reset if current index is out of bounds
   }
 
-  // Stats calculation based on loaded words
-  const totalWords = wordsData ? wordsData.length : 0; // Currently only loaded batch
-  const learnedCount = wordsData ? wordsData.filter(word => (progressMap.get(word._id) || 0) >= 3).length : 0;
-  const wordsToReview = wordsData ? wordsData.filter(word => (progressMap.get(word._id) || 0) >= 1 && (progressMap.get(word._id) || 0) < 3).length : 0;
-  // Note: progressPercentage here is only for the *loaded batch*, not global.
-  // For global, we might need a separate query for total count.
+  // Stats calculation based on global progress data (rawProgressData)
+  const totalWords = MOCK_WORD_LIST.length;
+  const learnedCount = useMemo(() =>
+    rawProgressData ? rawProgressData.filter(p => p.masteryLevel >= 3).length : 0
+  , [rawProgressData]);
+
+  const wordsToReview = useMemo(() =>
+    rawProgressData ? rawProgressData.filter(p => p.masteryLevel >= 1 && p.masteryLevel < 3).length : 0
+  , [rawProgressData]);
+
   const progressPercentage = totalWords > 0 ? Math.round((learnedCount / totalWords) * 100) : 0;
 
   // Deliberation & Audio Logic
@@ -95,13 +110,9 @@ export default function WordLearningPage() {
     }
   }, [currentWord]);
 
-  const playAudio = (text: string) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    window.speechSynthesis.speak(utterance);
-  };
 
-  const handleAction = async (action: 'known' | 'unknown') => {
+
+  const handleAction = useCallback(async (action: 'known' | 'unknown') => {
     if (!currentWord || isDeliberating) return;
 
     // Reset deliberation for next word
@@ -110,15 +121,19 @@ export default function WordLearningPage() {
 
     await updateProgress({
       contentId: currentWord.id,
-      contentType: currentWord.type,
+      contentType: currentWord.type as "word" | "phrasal" | "idiom",
       contentNumber: currentWord.step,
       action: action,
     });
 
-    // Move to next word (simplistic circular logic for now)
-    // The list is reactive, so we update the local index.
-    setCurrentIndex((prev) => (prev + 1) % wordsForSession.length);
-  };
+    // When marking as "known", the word gets filtered out (mastery >= 3)
+    // So we DON'T increment the index - the next word will automatically appear at the same index
+    // When marking as "unknown", the word stays in the list but we move to the next one
+    if (action === 'unknown') {
+      setCurrentIndex((prev) => (prev + 1) % wordsForSession.length);
+    }
+    // For "known", index stays the same - the filtered list will show the next word
+  }, [currentWord, isDeliberating, updateProgress, wordsForSession.length]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -133,7 +148,58 @@ export default function WordLearningPage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentWord, isDeliberating]);
+  }, [currentWord, handleAction, isDeliberating]);
+
+  // Handle opening the add dialog
+  const handleOpenDialog = (type: 'hindi' | 'synonym') => {
+    setDialogType(type);
+    setInputValue('');
+    setDialogOpen(true);
+  };
+
+  // Handle submitting new meanings/synonyms
+  const handleSubmitAddition = async () => {
+    if (!inputValue.trim()) {
+      toast.error("Please enter at least one word");
+      return;
+    }
+
+    // Parse comma-separated values
+    const newItems = inputValue
+      .split(',')
+      .map(item => item.trim())
+      .filter(item => item.length > 0);
+
+    if (newItems.length === 0) {
+      toast.error("Please enter valid words");
+      return;
+    }
+
+    if (!currentWord) {
+      toast.error("No word selected");
+      return;
+    }
+
+    try {
+      const result = await addContributions({
+        wordId: currentWord.id as Id<"words">,
+        type: dialogType,
+        items: newItems,
+      });
+
+      if (result.added > 0) {
+        toast.success(`✅ Added ${result.added} ${result.type}`);
+      } else {
+        toast.info("All items already exist");
+      }
+
+      setDialogOpen(false);
+      setInputValue('');
+    } catch (error) {
+      toast.error("Failed to add items");
+      console.error(error);
+    }
+  };
 
   const isLoadingWords = wordsData === undefined;
   if (isAuthLoading || !isAuthenticated || isLoadingWords) return <div className="flex h-screen items-center justify-center text-white">Loading Vocabulary...</div>;
@@ -151,135 +217,206 @@ export default function WordLearningPage() {
   if (!currentWord) return null;
 
   return (
-    <div className="bg-background-light dark:bg-background-dark min-h-screen flex flex-col overflow-hidden">
-      <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 gap-8 relative z-10 pt-10">
+    <div className="bg-background-light dark:bg-background-dark h-dvh flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col p-3 md:p-8 relative z-10 w-full max-w-5xl mx-auto">
         {/* Ambient Glows */}
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-primary/10 rounded-full blur-[80px] md:blur-[120px] pointer-events-none"></div>
 
-        {/* Stats */}
-        <div className="w-full max-w-3xl grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="flex flex-col items-center justify-center gap-1 rounded-2xl bg-secondary-dark/50 border border-white/5 p-3 backdrop-blur-sm">
-            <div className="flex items-center gap-2 text-blue-400">
-              <Icon name="library_books" />
-              <span className="text-xl font-bold">{learnedCount}</span>
-            </div>
-            <span className="text-xs text-gray-400 uppercase tracking-wider font-semibold">Words Known</span>
+        {/* Stats - Compact Row for Mobile */}
+        <div className="w-full grid grid-cols-3 gap-2 mb-4 shrink-0">
+          <div className="flex flex-col items-center justify-center rounded-xl bg-secondary-dark/50 border border-white/5 p-2 backdrop-blur-sm">
+             <span className="text-lg md:text-xl font-bold text-blue-400">{learnedCount}</span>
+             <span className="text-[10px] md:text-xs text-gray-500 font-bold uppercase">Known</span>
           </div>
-          <div className="flex flex-col items-center justify-center gap-1 rounded-2xl bg-secondary-dark/50 border border-white/5 p-3 backdrop-blur-sm">
-            <div className="flex items-center gap-2 text-red-400">
-              <Icon name="priority_high" />
-              <span className="text-xl font-bold">{wordsToReview}</span>
-            </div>
-            <span className="text-xs text-gray-400 uppercase tracking-wider font-semibold">To Review</span>
+          <div className="flex flex-col items-center justify-center rounded-xl bg-secondary-dark/50 border border-white/5 p-2 backdrop-blur-sm">
+             <span className="text-lg md:text-xl font-bold text-red-400">{wordsToReview}</span>
+             <span className="text-[10px] md:text-xs text-gray-500 font-bold uppercase">Review</span>
           </div>
-          <div className="col-span-2 flex flex-col justify-center gap-2 rounded-2xl bg-secondary-dark/50 border border-white/5 p-4 backdrop-blur-sm">
-            <div className="flex justify-between items-end">
-              <span className="text-xs text-gray-300 font-medium">Total Vocabulary Progress</span>
-              <span className="text-xs text-primary font-bold">{progressPercentage}%</span>
-            </div>
-            <Progress value={progressPercentage} className="h-2 bg-black/40" indicatorClassName="shadow-[0_0_10px_#36e27b]" />
+          <div className="flex flex-col justify-center rounded-xl bg-secondary-dark/50 border border-white/5 p-2 px-3 backdrop-blur-sm relative overflow-hidden">
+               <div className="flex justify-between items-end relative z-10 mb-1">
+                <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase">Progress</span>
+                <span className="text-xs text-primary font-bold">{progressPercentage}%</span>
+              </div>
+              <Progress value={progressPercentage} className="h-1.5 bg-black/40" indicatorClassName="bg-primary/80" />
           </div>
         </div>
 
-        {/* Word Card */}
-        <div className="w-full max-w-lg md:max-w-5xl perspective-1000">
-          <div className="relative w-full bg-surface-dark rounded-[2.5rem] border border-white/10 shadow-radiant p-8 md:p-12 flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-16 items-center transform transition-transform duration-300">
+        {/* Word Card Content Area - Flex Grow to fill space but allow scroll */}
+        <div className="flex-1 min-h-0 w-full perspective-1000 relative flex flex-col mb-4">
+          <div className="relative w-full h-full bg-surface-dark rounded-3xl md:rounded-[2.5rem] border border-white/10 shadow-radiant flex flex-col md:grid md:grid-cols-2 overflow-hidden">
 
-            {/* Word Step Indicator */}
-            <div className='absolute top-6 left-8 text-xs font-bold text-gray-500'>
-                Word {currentWord.step} of {MOCK_WORD_LIST.length}
-            </div>
+             {/* Scrollable Content Wrapper */}
+             <div className="flex-1 overflow-y-auto scrollbar-hide p-6 md:p-12">
+                <div className="flex flex-col gap-6 md:gap-16 md:grid md:grid-cols-1 items-center h-full">
 
-            {/* Mastery Level Indicator */}
-            <div className={`absolute top-6 right-8 px-3 py-1 rounded-full text-xs font-bold ${getMasteryColor(currentWord.masteryLevel)}`}>
-                Mastery: {currentWord.masteryLevel}/5
-            </div>
+                    {/* Indicators */}
+                    <div className="w-full flex justify-between items-center md:absolute md:top-6 md:left-8 md:right-8 md:w-auto">
+                        <div className='text-[10px] md:text-xs font-bold text-gray-500'>
+                            Word {currentWord.step} / {totalWords}
+                        </div>
+                        <div className={`px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-bold ${getMasteryColor(currentWord.masteryLevel)}`}>
+                            Lvl {currentWord.masteryLevel}
+                        </div>
+                    </div>
 
-            {/* Left Column: Word & Identity */}
-            <div className="flex flex-col gap-6 text-center items-center justify-center h-full">
-              <div className="flex flex-col items-center">
-                <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight text-shadow-glow mb-4 flex items-center gap-4">
-                    {currentWord.word}
-                    <button
-                        onClick={() => playAudio(currentWord.word)}
-                        className="p-3 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all transform hover:scale-110 active:scale-95"
-                        title="Listen to pronunciation"
-                    >
-                        <Icon name="volume_up" className="text-3xl" />
-                    </button>
-                </h1>
+                    {/* Desktop Split Layout */}
+                     <div className="w-full flex flex-col md:grid md:grid-cols-2 md:gap-16 md:items-center">
+                        {/* Word Section */}
+                        <div className="flex flex-col gap-4 text-center items-center justify-center mt-2 md:mt-0">
+                            <h1 className="text-4xl md:text-7xl font-black text-white tracking-tight text-shadow-glow flex flex-col items-center wrap-break-word text-center">
+                                <span className="break-all">{currentWord.word}</span>
+                            </h1>
 
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                    {currentWord.hindiMeanings.map((meaning: string, idx: number) => (
-                      <div key={idx} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-slate-200">
-                          {idx === 0 && <Icon name="translate" className="text-sm text-slate-400" />}
-                          <span className="font-medium text-lg">{meaning}</span>
-                      </div>
-                    ))}
+                            {/* Hindi Meanings - Scrollable on Mobile, Wrapped on Desktop */}
+                            <div className="w-full overflow-x-auto md:overflow-x-visible scrollbar-hide">
+                                <div className="flex md:flex-wrap items-center gap-2 w-max md:w-full min-w-full md:min-w-0 justify-center">
+                                    {currentWord.hindiMeanings.map((meaning: string, idx: number) => (
+                                        <div
+                                            key={idx}
+                                            className="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-primary/20 border border-primary/40 text-primary shadow-sm hover:shadow-primary/20 transition-shadow shrink-0"
+                                        >
+                                            <span className="font-semibold text-sm md:text-base whitespace-nowrap">{meaning}</span>
+                                        </div>
+                                    ))}
+                                    <button
+                                        onClick={() => handleOpenDialog('hindi')}
+                                        className="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-primary/10 border border-primary/30 border-dashed text-primary/80 hover:bg-primary/20 hover:border-primary/50 transition-all shrink-0"
+                                        title="Add Hindi meaning"
+                                    >
+                                        <span className="font-medium text-sm md:text-base whitespace-nowrap">+ Add</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Divider Mobile */}
+                        <div className="h-px w-full bg-linear-to-r from-transparent via-white/10 to-transparent md:hidden shrink-0 my-2"></div>
+
+                        {/* Divider Desktop */}
+                        <div className="hidden md:block absolute left-1/2 top-10 bottom-10 w-px bg-linear-to-b from-transparent via-white/10 to-transparent"></div>
+
+                        {/* Definition Section */}
+                        <div className="flex flex-col gap-4 items-center text-center md:items-start md:text-left justify-center w-full">
+                            <div className="flex flex-col gap-2 w-full">
+                                <span className="text-xs md:text-sm font-bold text-primary uppercase tracking-widest hidden md:block">Definition</span>
+                                <p className="text-slate-200 text-lg md:text-2xl leading-relaxed font-medium">
+                                    {currentWord.meaning}
+                                </p>
+                            </div>
+
+                            {/* Example */}
+                            {currentWord.sentence && (
+                                <div className="relative w-full mt-2 p-4 md:p-6 rounded-2xl bg-black/20 border border-white/5">
+                                    <p className="relative z-10 text-slate-300 text-base md:text-lg leading-relaxed font-body italic">
+                                        <span dangerouslySetInnerHTML={{ __html: currentWord.sentence.replace(new RegExp(currentWord.word, 'gi'), match => `<strong class="text-primary not-italic">${match}</strong>`) }} />
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Synonyms - Scrollable on Mobile, Wrapped on Desktop */}
+                            {currentWord.synonyms && currentWord.synonyms.length > 0 && (
+                                <div className="w-full mt-3 md:mt-4">
+                                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">
+                                        Synonyms
+                                    </span>
+                                    <div className="w-full overflow-x-auto md:overflow-x-visible scrollbar-hide">
+                                        <div className="flex md:flex-wrap items-center gap-2 w-max md:w-full min-w-0 md:justify-start">
+                                            {currentWord.synonyms.map((synonym: string, idx: number) => (
+                                                <div
+                                                    key={idx}
+                                                    className="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-primary/20 border border-primary/40 text-primary shadow-sm hover:shadow-primary/20 transition-shadow shrink-0"
+                                                >
+                                                    <span className="font-semibold text-sm md:text-base whitespace-nowrap">{synonym}</span>
+                                                </div>
+                                            ))}
+                                            <button
+                                                onClick={() => handleOpenDialog('synonym')}
+                                                className="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-primary/10 border border-primary/30 border-dashed text-primary/80 hover:bg-primary/20 hover:border-primary/50 transition-all shrink-0"
+                                                title="Add synonym"
+                                            >
+                                                <span className="font-medium text-sm md:text-base whitespace-nowrap">+ Add</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Divider for Mobile Only */}
-            <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent md:hidden"></div>
-
-            {/* Divider for Desktop (Vertical) */}
-            <div className="hidden md:block absolute left-1/2 top-10 bottom-10 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
-
-             {/* Right Column: Meaning & Context */}
-            <div className="flex flex-col gap-6 items-center text-center md:items-start md:text-left h-full justify-center">
-              <div className="flex flex-col gap-3">
-                  <span className="text-sm font-bold text-primary uppercase tracking-widest">Definition</span>
-                  <p className="text-slate-200 text-xl md:text-2xl leading-relaxed font-medium">
-                    {currentWord.meaning}
-                  </p>
-              </div>
-
-              {/* Examples */}
-              {currentWord.sentence && (
-                  <div className="relative w-full mt-2 p-6 rounded-2xl bg-black/20 border border-white/5 hover:border-white/10 transition-colors">
-                    <Icon name="format_quote" className="absolute top-4 left-4 text-primary/30 text-3xl select-none" />
-                    <p className="relative z-10 text-slate-300 text-lg leading-relaxed font-body pl-6 italic">
-                        "{currentWord.sentence.replace(currentWord.word, `<strong class="text-primary not-italic">${currentWord.word}</strong>`)}"
-                    </p>
-                  </div>
-              )}
-            </div>
+             </div>
           </div>
         </div>
 
-        {/* Actions */ }
-        <div className="w-full max-w-lg md:max-w-3xl flex items-center justify-center gap-4 mt-8">
+        {/* Actions - Fixed at Bottom */}
+        <div className="w-full shrink-0 flex items-center justify-center gap-3   pb-16  md:pb-0 z-50 bg-background-light/0 dark:bg-background-dark/0 backdrop-blur-none">
           <Button
             variant="outline"
             onClick={() => handleAction('unknown')}
             disabled={isDeliberating}
-            className="flex-1 h-14 rounded-full border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all disabled:opacity-50 disabled:cursor-wait"
+            className="flex-1 h-12 md:h-14 rounded-full border-red-500/50 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all disabled:opacity-50 disabled:cursor-wait text-sm font-bold"
           >
-            <Icon name="close" />
-            I need review (X)
+            Review (X)
           </Button>
           <Button
             onClick={() => handleAction('known')}
             variant="glow"
             size="xl"
             disabled={isDeliberating}
-            className="flex-[1.5] transition-all disabled:opacity-50 disabled:cursor-wait"
+            className="flex-[1.5] h-12 md:h-14 transition-all disabled:opacity-50 disabled:cursor-wait text-sm font-bold"
           >
             {isDeliberating ? (
                 <span className="flex items-center gap-2">
                     <Icon name="hourglass_empty" className="animate-spin" />
-                    Wait {timeLeft}s...
+                    {timeLeft}s
                 </span>
             ) : (
                 <>
-                <Icon name="check" />
-                I know this word (Space)
+                I Know (Space)
                 </>
             )}
           </Button>
         </div>
       </main>
+
+      {/* Add Meanings/Synonyms Dialog */}
+      <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <AlertDialogContent className="bg-surface-dark border-surface-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white text-xl font-bold">
+              Add {dialogType === 'hindi' ? 'Hindi Meaning(s)' : 'Synonym(s)'}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
+              Enter one or more {dialogType === 'hindi' ? 'Hindi meanings' : 'synonyms'} separated by commas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder={dialogType === 'hindi' ? 'e.g., शब्द, अर्थ, परिभाषा' : 'e.g., word, term, expression'}
+              className="bg-background-dark border-surface-border text-white placeholder:text-gray-500"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSubmitAddition();
+                }
+              }}
+            />
+            <p className="text-xs text-gray-500 mt-2">Separate multiple items with commas</p>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-surface-border hover:bg-surface-highlight text-white border-none">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleSubmitAddition}
+              className="bg-primary hover:bg-primary/90 text-background-dark"
+            >
+              Add
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

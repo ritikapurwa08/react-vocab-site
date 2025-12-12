@@ -5,10 +5,12 @@ import PhrasalVerbsPage from './pages/PhrasalVerbsPage';
 import AuthPage from './pages/AuthPage';
 import TestPage from './pages/TestPage';
 import TestSelection from './pages/TestSelectionPage';
+import TestHistoryPage from './pages/TestHistoryPage';
 import WordLearningPage from './pages/WordLearningPage';
 
 
 import Navbar from '@/layouts/Navbar';
+import { BottomNav } from '@/layouts/BottomNavigation';
 import UserProfilePage from './pages/user-profile-page';
 
 function App() {
@@ -28,12 +30,13 @@ function App() {
         <Route path="/tests" element={<TestSelection />} />
         {/* Single dynamic route for all tests */}
         <Route path="/test/:testId" element={<TestPage />} />
+        <Route path="/test-history" element={<TestHistoryPage />} />
 
         {/* Auth and Profile */}
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/profile" element={<UserProfilePage />} />
       </Routes>
-      {/* <BottomNav /> - Removed the bottom nav based on user request to use only main bar */}
+      <BottomNav />
     </BrowserRouter>
   );
 }

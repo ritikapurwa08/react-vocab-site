@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 // Force sync
 
 // --- Queries ---
@@ -36,6 +37,35 @@ export const getWordByStep = query({
       .withIndex("by_step", (q) => q.eq("step", args.step))
       .first();
     return word;
+  },
+});
+
+// Smart Resume: Get next batch of words based on user progress
+export const getNextWords = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+
+    let startStep = 1;
+
+    if (userId) {
+       const lastProgress = await ctx.db
+           .query("user_word_progress")
+           .withIndex("by_user_type_number", (q) => q.eq("userId", userId).eq("contentType", "word"))
+           .order("desc")
+           .first();
+
+       if (lastProgress) {
+           startStep = lastProgress.contentNumber + 1;
+       }
+    }
+
+    const words = await ctx.db
+      .query("words")
+      .withIndex("by_step", (q) => q.gte("step", startStep))
+      .take(10); // Batch size 10 as requested
+
+    return words;
   },
 });
 
@@ -83,5 +113,42 @@ export const seedWords = mutation({
       }
     }
     return `Seeded ${count} new words.`;
+  },
+});
+
+// Add Hindi meanings or synonyms to a word
+export const addWordContributions = mutation({
+  args: {
+    wordId: v.id("words"),
+    type: v.union(v.literal("hindi"), v.literal("synonym")),
+    items: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const word = await ctx.db.get(args.wordId);
+    if (!word) {
+      throw new Error("Word not found");
+    }
+
+    if (args.type === "hindi") {
+      // Add new Hindi meanings (avoid duplicates)
+      const existingMeanings = new Set(word.hindiMeanings);
+      const newMeanings = args.items.filter(item => !existingMeanings.has(item));
+
+      await ctx.db.patch(args.wordId, {
+        hindiMeanings: [...word.hindiMeanings, ...newMeanings],
+      });
+
+      return { added: newMeanings.length, type: "Hindi meanings" };
+    } else {
+      // Add new synonyms (avoid duplicates)
+      const existingSynonyms = new Set(word.synonyms);
+      const newSynonyms = args.items.filter(item => !existingSynonyms.has(item));
+
+      await ctx.db.patch(args.wordId, {
+        synonyms: [...word.synonyms, ...newSynonyms],
+      });
+
+      return { added: newSynonyms.length, type: "synonyms" };
+    }
   },
 });

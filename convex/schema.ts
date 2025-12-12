@@ -46,6 +46,30 @@ export default defineSchema({
     totalQuestions: v.number(),
     correctAnswers: v.number(),
     date: v.number(), // Timestamp
+    testSessionId: v.optional(v.string()), // Groups questions from same test session
   })
-    .index("by_user_date", ["userId", "date"]),
+    .index("by_user_date", ["userId", "date"])
+    .index("by_user_session", ["userId", "testSessionId"]),
+
+  // NEW: Track individual question attempts to prevent showing same questions
+  user_test_attempts: defineTable({
+    userId: v.id("users"),
+    questionId: v.string(), // Unique ID of the question
+    testType: v.union(v.literal("phrasal"), v.literal("idiom"), v.literal("grammar"), v.literal("vocabulary")),
+    selectedAnswer: v.string(), // User's chosen answer
+    isCorrect: v.boolean(), // Whether the answer was correct
+    attemptDate: v.number(), // Timestamp
+    testSessionId: v.string(), // Groups questions from same test session
+  })
+    .index("by_user_question", ["userId", "questionId"]) // Check if question already attempted
+    .index("by_user_test_type", ["userId", "testType"]) // Get all attempts for a test type
+    .index("by_session", ["testSessionId"]), // Get all attempts in a session
+
+  // Track user streaks and daily activity
+  user_streaks: defineTable({
+    userId: v.id("users"),
+    streak: v.number(),
+    lastLoginDate: v.number(), // Timestamp of last activity
+  })
+    .index("by_user", ["userId"]),
 });

@@ -135,7 +135,7 @@ export default function AuthPage() {
 
       <div className="w-full max-w-[1100px] grid lg:grid-cols-2 gap-12 lg:gap-20 items-center z-10">
         {/* Left Column: Hero Text */}
-        <div className="flex flex-col gap-8 hidden lg:flex">
+        <div className="flex-col gap-8 hidden lg:flex">
           <div className="flex flex-col gap-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 w-fit">
               <span className="size-2 rounded-full bg-primary animate-pulse"></span>
@@ -143,7 +143,7 @@ export default function AuthPage() {
             </div>
             <h1 className="text-slate-900 dark:text-white text-5xl lg:text-6xl font-black leading-[1.1] tracking-[-0.033em]">
               Master English <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">Like a Native.</span>
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-emerald-400">Like a Native.</span>
             </h1>
             <p className="text-slate-500 dark:text-gray-400 text-lg lg:text-xl font-normal leading-relaxed max-w-md">
               Create an account to track your progress, save tough idioms, and compete on the leaderboard.
@@ -158,7 +158,7 @@ export default function AuthPage() {
           transition={{ duration: 0.5 }}
           className="relative w-full max-w-md mx-auto"
         >
-          <div className="absolute -inset-1 bg-gradient-to-b from-primary/30 to-transparent rounded-[2.2rem] blur opacity-75"></div>
+          <div className="absolute -inset-1 bg-linear-to-b from-primary/30 to-transparent rounded-[2.2rem] blur opacity-75"></div>
           <Card className="relative border-surface-border bg-surface-dark/95 backdrop-blur-sm shadow-2xl rounded-2xl">
             <CardContent className="p-8 flex flex-col gap-6">
               <Tabs value={mode} onValueChange={(v) => { setMode(v as 'login' | 'signup'); setError(""); }} className="w-full">

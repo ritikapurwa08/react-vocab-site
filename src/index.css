@@ -60,7 +60,7 @@
   --card-foreground: 150 50% 5%;
   --popover: 0 0% 100%;
   --popover-foreground: 150 50% 5%;
-  --primary: 144 75% 55%; /* #36e27b - The new Primary Green */
+  --primary: 145 78% 55%; /* #36e27b - The new Primary Green */
   --primary-foreground: 153 28% 8%; /* #111714 */
   --secondary: 150 20% 90%;
   --secondary-foreground: 150 50% 5%;
@@ -78,16 +78,16 @@
 
 .dark {
   /* Design Match: Deep Forest Theme */
-  --background: 153 28% 8%;   /* #111714 */
+  --background: 153 28% 8%; /* #111714 */
   --foreground: 150 10% 95%;
 
-  --card: 153 15% 12%;        /* #1c2620 appx */
+  --card: 153 15% 12%; /* #1c2620 appx */
   --card-foreground: 150 10% 95%;
 
   --popover: 153 15% 12%;
   --popover-foreground: 150 10% 95%;
 
-  --primary: 144 75% 55%;     /* #36e27b */
+  --primary: 145 78% 55%;     /* #36e27b */
   --primary-foreground: 153 28% 8%;
 
   --secondary: 155 30% 15%;
@@ -96,13 +96,13 @@
   --muted: 155 20% 15%;
   --muted-foreground: 150 20% 60%;
 
-  --accent: 156 17% 20%;      /* #2a3b30 surface highlight */
+  --accent: 156 17% 20%; /* #2a3b30 surface highlight */
   --accent-foreground: 150 10% 95%;
 
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 157 15% 19%;      /* #29382f surface border */
+  --border: 157 15% 19%; /* #29382f surface border */
   --input: 157 15% 19%;
   --ring: 144 75% 55%;
 }
@@ -112,31 +112,31 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-display;
+    @apply bg-background-light text-slate-900 dark:bg-background-dark dark:text-slate-100 font-display;
   }
 }
 
 @layer utilities {
   .glass-panel {
-    @apply bg-white/70 dark:bg-[#1c2620]/70 backdrop-blur-lg border border-white/20 dark:border-[#29382f] shadow-xl;
+    @apply bg-white/70 dark:bg-surface-dark/70 backdrop-blur-lg border border-white/20 dark:border-surface-border shadow-xl;
   }
 
   .text-shadow-glow {
-      text-shadow: 0 0 20px rgba(54, 226, 123, 0.3);
+    text-shadow: 0 0 20px rgba(54, 226, 123, 0.3);
   }
 
   .scrollbar-hide::-webkit-scrollbar {
-      display: none;
+    display: none;
   }
   .scrollbar-hide {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
 /* Material Symbols Utility */
 .material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
+  font-family: "Material Symbols Outlined";
   font-weight: normal;
   font-style: normal;
   font-size: 24px;
@@ -147,10 +147,11 @@
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
-  -webkit-font-feature-settings: 'liga';
+  -webkit-font-feature-settings: "liga";
+  font-feature-settings: "liga";
   -webkit-font-smoothing: antialiased;
 }
 
 .material-symbols-outlined.fill {
-  font-variation-settings: 'FILL' 1;
+  font-variation-settings: "FILL" 1;
 }

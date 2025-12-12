@@ -10,6 +10,7 @@
 
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as testAttempts from "../testAttempts.js";
 import type * as user from "../user.js";
 import type * as wordProgress from "../wordProgress.js";
 import type * as words from "../words.js";
@@ -23,6 +24,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   http: typeof http;
+  testAttempts: typeof testAttempts;
   user: typeof user;
   wordProgress: typeof wordProgress;
   words: typeof words;

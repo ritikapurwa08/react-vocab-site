@@ -58,6 +58,51 @@ export const updateProgress = mutation({
     } else {
       await ctx.db.insert("user_word_progress", updateData);
     }
+
+    // --- Streak Logic ---
+    const now = Date.now();
+    const streakDoc = await ctx.db
+        .query("user_streaks")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .first();
+
+    if (!streakDoc) {
+        // First ever activity
+        await ctx.db.insert("user_streaks", {
+            userId,
+            streak: 1,
+            lastLoginDate: now,
+        });
+    } else {
+        const lastDate = new Date(streakDoc.lastLoginDate);
+        const currentDate = new Date(now);
+
+        // Reset hours to compare calendar days
+        lastDate.setHours(0, 0, 0, 0);
+        currentDate.setHours(0, 0, 0, 0);
+
+        const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) {
+            // Consecutive day: Increment
+            await ctx.db.patch(streakDoc._id, {
+                streak: streakDoc.streak + 1,
+                lastLoginDate: now,
+            });
+        } else if (diffDays > 1) {
+            // Missed a day: Reset
+            await ctx.db.patch(streakDoc._id, {
+                streak: 1,
+                lastLoginDate: now,
+            });
+        } else {
+            // Same day: Just update timestamp to now
+             await ctx.db.patch(streakDoc._id, {
+                lastLoginDate: now,
+            });
+        }
+    }
   },
 });
 
@@ -94,6 +139,7 @@ export const saveTestResult = mutation({
     testType: v.union(v.literal("phrasal"), v.literal("idiom"), v.literal("grammar"), v.literal("vocabulary")),
     totalQuestions: v.number(),
     correctAnswers: v.number(),
+    testSessionId: v.optional(v.string()), // NEW: Group questions from same session
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -110,6 +156,7 @@ export const saveTestResult = mutation({
       totalQuestions: args.totalQuestions,
       correctAnswers: args.correctAnswers,
       date: Date.now(),
+      testSessionId: args.testSessionId,
     });
   },
 });
@@ -198,6 +245,14 @@ export const getUserProfileStats = query({
         // 5. Total Questions Attempted
         const totalQuestionsAttempted = tests.reduce((sum, t) => sum + t.totalQuestions, 0);
 
+        // 6. Streak Data
+        const streakData = await ctx.db
+            .query("user_streaks")
+            .withIndex("by_user", (q) => q.eq("userId", userId))
+            .first();
+
+        const currentStreak = streakData ? streakData.streak : 0;
+
         return {
             name: user.name,
             email: user.email,
@@ -209,8 +264,8 @@ export const getUserProfileStats = query({
             averageAccuracy,
             totalQuestionsAttempted,
             nextWordNumber,
-            weeklyActivity, // New field
-            // Example of a derived stat for needs review
+            weeklyActivity,
+            currentStreak, // New field
             needsReviewCount: allProgress.filter(p => p.masteryLevel > 0 && p.masteryLevel < 3).length,
         };
     },

@@ -48,6 +48,8 @@ export default function Navbar() {
           <h2 className="text-xl font-bold leading-tight tracking-tight">EnglishHub</h2>
         </Link>
 
+        {/* Mobile Hamburger Menu */}
+
         {/* Desktop Nav Links */}
         <nav className="hidden md:flex flex-1 justify-center gap-8">
           {navLinks.map((link) => (
@@ -61,12 +63,12 @@ export default function Navbar() {
             <div className="h-10 w-24 bg-surface-dark/50 rounded-full animate-pulse" />
           ) : isAuthenticated ? (
             <>
-            <Button variant="ghost" size="icon" className="rounded-full text-gray-300 hover:text-white hover:bg-white/10 hidden sm:flex">
+            <Button variant="ghost" size="icon" className="rounded-full text-gray-300 hover:text-primary hover:bg-primary/10 hidden sm:flex">
                 <Icon name="notifications" className="text-xl" />
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full text-gray-300 hover:text-white hover:bg-white/10 border border-surface-border">
+                <Button variant="ghost" size="icon" className="rounded-full text-gray-300 hover:text-primary hover:bg-primary/10 border border-surface-border">
                   <User className="size-5" />
                 </Button>
               </DropdownMenuTrigger>
